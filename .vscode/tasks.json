@@ -1,0 +1,25 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "go: tidy",
+            "type": "shell",
+            "command": "go mod tidy"
+        },
+        {
+            "label": "go: run",
+            "type": "shell",
+            "command": "go run ./cmd/api"
+        },
+        {
+            "label": "docker: up",
+            "type": "shell",
+            "command": "docker compose up -d --build"
+        },
+        {
+            "label": "docker: down",
+            "type": "shell",
+            "command": "docker compose down -v"
+        }
+    ]
+}
