@@ -36,3 +36,12 @@ const (
 	LeaveRejected  LeaveStatus = "REJECTED"
 	LeaveCancelled LeaveStatus = "CANCELLED"
 )
+
+type EmploymentStatus string
+
+const (
+	EmploymentFullTime EmploymentStatus = "FULLTIME"
+	EmploymentContract EmploymentStatus = "CONTRACT"
+	EmploymentIntern   EmploymentStatus = "INTERN"
+	EmploymentPartTime EmploymentStatus = "PARTTIME"
+)

@@ -9,7 +9,6 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o /hris ./c
 FROM gcr.io/distroless/base-debian12
 WORKDIR /
 COPY --from=build /hris /hris
-COPY .env /.env
 EXPOSE 8080
 USER nonroot:nonroot
 ENTRYPOINT ["/hris"]

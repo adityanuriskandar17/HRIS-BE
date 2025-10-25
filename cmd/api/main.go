@@ -22,12 +22,29 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// TODO: call migrations & seed admin
+	if err := db.AutoMigrate(gdb); err != nil {
+		log.Fatal(err)
+	}
+	if err := db.SeedReferenceData(gdb); err != nil {
+		log.Fatal(err)
+	}
 
 	r := httpx.NewRouter(func(api chi.Router) {
 		authH := &handler.AuthHandler{DB: gdb, JWTSecret: cfg.JWTSecret}
 		api.Post("/auth/login", authH.Login)
 		// TODO: add employee/attendance/leave handlers & middlewares
+
+		masterH := &handler.MasterDataHandler{DB: gdb}
+		api.Route("/master", func(m chi.Router) {
+			m.Get("/units", masterH.ListUnits)
+			m.Post("/units", masterH.CreateUnit)
+
+			m.Get("/positions", masterH.ListPositions)
+			m.Post("/positions", masterH.CreatePosition)
+
+			m.Get("/employees", masterH.ListEmployees)
+			m.Post("/employees", masterH.CreateEmployee)
+		})
 	})
 
 	addr := ":" + cfg.Port
