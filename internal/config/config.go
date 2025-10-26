@@ -13,6 +13,12 @@ type Config struct {
 	JWTSecret     string
 	AdminEmail    string
 	AdminPassword string
+	Telemetry     TelemetryConfig
+}
+
+type TelemetryConfig struct {
+	ServiceName    string
+	JaegerEndpoint string
 }
 
 func Load() (*Config, error) {
@@ -23,6 +29,10 @@ func Load() (*Config, error) {
 		JWTSecret:     os.Getenv("JWT_SECRET"),
 		AdminEmail:    get("ADMIN_EMAIL", "admin@example.com"),
 		AdminPassword: get("ADMIN_PASSWORD", "admin12345"),
+		Telemetry: TelemetryConfig{
+			ServiceName:    get("OTEL_SERVICE_NAME", "hris-api"),
+			JaegerEndpoint: get("OTEL_EXPORTER_JAEGER_ENDPOINT", ""),
+		},
 	}
 	if cfg.JWTSecret == "" {
 		return nil, errors.New("JWT_SECRET required")
