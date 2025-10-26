@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Employee struct {
 	ID               uint64           `gorm:"primaryKey" json:"id"`
@@ -12,10 +16,15 @@ type Employee struct {
 	Unit             Unit             `gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;" json:"unit"`
 	PositionID       uint64           `json:"positionId"`
 	Position         Position         `gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;" json:"position"`
-	EmploymentStatus EmploymentStatus `gorm:"type:varchar(16);not null;default:'FULLTIME'" json:"employmentStatus"`
-	StartDate        time.Time        `json:"startDate"`
-	EndDate          *time.Time       `json:"endDate,omitempty"`
-	DateOfBirth      *time.Time       `json:"dateOfBirth,omitempty"`
+	EmploymentStatus EmploymentStatus `gorm:"type:employment_status_enum;not null;default:'FULLTIME'" json:"employmentStatus"`
+	StartDate        time.Time        `gorm:"type:date" json:"startDate"`
+	EndDate          *time.Time       `gorm:"type:date" json:"endDate,omitempty"`
+	DateOfBirth      *time.Time       `gorm:"type:date" json:"dateOfBirth,omitempty"`
 	CreatedAt        time.Time        `json:"createdAt"`
 	UpdatedAt        time.Time        `json:"updatedAt"`
+	CreatedByID      *uint64          `gorm:"column:created_by" json:"createdById,omitempty"`
+	CreatedBy        *UserAccount     `gorm:"foreignKey:CreatedByID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"-"`
+	UpdatedByID      *uint64          `gorm:"column:updated_by" json:"updatedById,omitempty"`
+	UpdatedBy        *UserAccount     `gorm:"foreignKey:UpdatedByID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"-"`
+	DeletedAt        gorm.DeletedAt   `gorm:"index" json:"-"`
 }

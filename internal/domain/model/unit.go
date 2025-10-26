@@ -1,11 +1,20 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Unit struct {
-	ID        uint64    `gorm:"primaryKey" json:"id"`
-	Code      string    `gorm:"uniqueIndex:units_code_key;size:32;not null" json:"code"`
-	Name      string    `gorm:"size:100;not null" json:"name"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	ID          uint64         `gorm:"primaryKey" json:"id"`
+	Code        string         `gorm:"uniqueIndex:units_code_key;size:32;not null" json:"code"`
+	Name        string         `gorm:"size:100;not null" json:"name"`
+	CreatedByID *uint64        `gorm:"column:created_by" json:"createdById,omitempty"`
+	CreatedBy   *UserAccount   `gorm:"foreignKey:CreatedByID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"-"`
+	UpdatedByID *uint64        `gorm:"column:updated_by" json:"updatedById,omitempty"`
+	UpdatedBy   *UserAccount   `gorm:"foreignKey:UpdatedByID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"-"`
+	CreatedAt   time.Time      `json:"createdAt"`
+	UpdatedAt   time.Time      `json:"updatedAt"`
+	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
 }
