@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# Pre-commit hook to automatically run go mod tidy
+# This ensures that go.mod and go.sum are always up-to-date before commits
+
+echo "Running go mod tidy..."
+
+# Check if we're in a Go project with go.mod
+if [ ! -f "go.mod" ]; then
+    echo "No go.mod file found, skipping go mod tidy"
+    exit 0
+fi
+
+# Run go mod tidy
+if ! go mod tidy; then
+    echo "Error: go mod tidy failed"
+    exit 1
+fi
+
+# Check if there are any changes to go.mod or go.sum
+if ! git diff --quiet go.mod go.sum; then
+    echo "Changes detected in go.mod or go.sum after running go mod tidy"
+    echo "Please add these changes to your commit and try again"
+    exit 1
+fi
+
+echo "go mod tidy completed successfully"
+exit 0

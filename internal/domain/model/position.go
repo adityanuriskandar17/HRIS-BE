@@ -3,19 +3,22 @@ package model
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type Position struct {
-	ID          uint64         `gorm:"primaryKey" json:"id"`
+	ID          uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	CompanyID   uuid.UUID      `gorm:"type:uuid;not null;index" json:"companyId"`
+	Company     Company        `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
 	Title       string         `gorm:"size:100;not null" json:"title"`
-	UnitID      *uint64        `json:"unitId"`
-	Unit        *Unit          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"unit,omitempty"`
-	CreatedByID *uint64        `gorm:"column:created_by" json:"createdById,omitempty"`
-	CreatedBy   *UserAccount   `gorm:"foreignKey:CreatedByID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"-"`
-	UpdatedByID *uint64        `gorm:"column:updated_by" json:"updatedById,omitempty"`
-	UpdatedBy   *UserAccount   `gorm:"foreignKey:UpdatedByID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"-"`
+	Description string         `gorm:"type:text" json:"description"`
+	Level       int            `gorm:"default:1" json:"level"`
 	CreatedAt   time.Time      `json:"createdAt"`
 	UpdatedAt   time.Time      `json:"updatedAt"`
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+func (Position) TableName() string {
+	return "positions"
 }

@@ -1,4 +1,4 @@
-.PHONY: run tidy up down fmt lint test
+.PHONY: run tidy up down fmt lint test install-hooks
 
 run:
 	go run ./cmd/api
@@ -17,3 +17,7 @@ down:
 
 test:
 	go test ./...
+
+install-hooks:
+	chmod +x scripts/install-hooks.sh
+	./scripts/install-hooks.sh

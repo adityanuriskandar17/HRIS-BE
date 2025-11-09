@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# Get the commit message from the file passed as argument
+commit_message=$(cat "$1")
+
+# Define allowed commit types
+allowed_types=("ci" "chore" "docs" "ticket" "feat" "fix" "perf" "refactor" "revert" "style")
+
+# Check if the commit message follows the conventional commit format
+# Format: type(scope): description
+if [[ ! $commit_message =~ ^([a-z]+)(\(.+\))?:\s.+ ]]; then
+    echo "Error: Commit message must follow the conventional commit format: type(scope): description"
+    echo "Allowed types: ${allowed_types[*]}"
+    exit 1
+fi
+
+# Extract the type from the commit message
+type=$(echo "$commit_message" | sed -E 's/^([a-z]+)(\(.+\))?:.*/\1/')
+
+# Check if the type is in the allowed types
+if [[ ! " ${allowed_types[*]} " =~ " ${type} " ]]; then
+    echo "Error: Commit type '$type' is not allowed."
+    echo "Allowed types: ${allowed_types[*]}"
+    exit 1
+fi
+
+exit 0
