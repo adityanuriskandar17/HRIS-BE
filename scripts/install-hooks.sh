@@ -1,18 +1,18 @@
 #!/bin/bash
 
-# Script to install Git hooks from the hooks directory to .git/hooks
+# Script to install Git hooks from the .husky directory to .git/hooks
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 # Define source and destination directories
-HOOKS_SOURCE_DIR="$PROJECT_ROOT/hooks"
+HOOKS_SOURCE_DIR="$PROJECT_ROOT/.husky"
 HOOKS_DEST_DIR="$PROJECT_ROOT/.git/hooks"
 
-# Check if the hooks directory exists
+# Check if the .husky directory exists
 if [ ! -d "$HOOKS_SOURCE_DIR" ]; then
-    echo "Error: Hooks directory not found at $HOOKS_SOURCE_DIR"
+    echo "Error: .husky directory not found at $HOOKS_SOURCE_DIR"
     exit 1
 fi
 
