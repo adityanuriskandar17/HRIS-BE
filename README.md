@@ -16,6 +16,29 @@ This project includes Git hooks to ensure code quality and consistency:
 1. **commit-msg**: Validates commit messages follow conventional commit format
 2. **pre-commit**: Automatically runs `go mod tidy` before each commit
 
+The hooks are located in the `.husky` directory and are installed to `.git/hooks` using the `install-hooks.sh` script.
+
+### Commit Message Format
+
+The commit-msg hook enforces the conventional commit format:
+```
+type(scope): description
+```
+
+Allowed types:
+- `ci`: Changes to CI configuration files and scripts
+- `chore`: Maintenance tasks, dependency updates, etc.
+- `docs`: Documentation only changes
+- `ticket`: Ticket-related changes
+- `feat`: New features
+- `fix`: Bug fixes
+- `perf`: Performance improvements
+- `refactor`: Code refactoring without functional changes
+- `revert`: Reverting previous changes
+- `style`: Code style changes (formatting, missing semicolons, etc.)
+
+### Installation
+
 To install these hooks after cloning the repository, you can use either method:
 
 **Method 1: Using make (recommended)**
