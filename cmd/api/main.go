@@ -63,16 +63,19 @@ func main() {
 	subscriptionRepo := repository.NewSubscriptionRepository(gdb)
 	planRepo := repository.NewPlanRepository(gdb)
 	invoiceRepo := repository.NewInvoiceRepository(gdb)
+	companyRepo := domainRepository.NewCompanyRepository(gdb)
 
 	// Initialize services
 	tenantService := services.NewTenantService(tenantRepo)
 	subscriptionService := services.NewSubscriptionService(subscriptionRepo, planRepo)
 	invoiceService := services.NewInvoiceService(invoiceRepo, subscriptionRepo)
+	companyService := services.NewCompanyService(companyRepo)
 
 	// Initialize handlers
 	tenantHandler := handler.NewTenantHandler(tenantService)
 	subscriptionHandler := handler.NewSubscriptionHandler(subscriptionService)
 	invoiceHandler := handler.NewInvoiceHandler(invoiceService)
+	companyHandler := handler.NewCompanyHandler(companyService)
 
 	r := httpx.NewRouter(func(api chi.Router) {
 		authH := handler.NewAuthHandler(userRepo, cfg.JWTSecret)
@@ -112,7 +115,7 @@ func main() {
 			m.Post("/{id}/pay", invoiceHandler.Pay)
 			m.Get("/subscription/{subscriptionId}", invoiceHandler.GetBySubscriptionID)
 		})
-	}, tenantHandler, subscriptionHandler, invoiceHandler, cfg.Port)
+	}, tenantHandler, subscriptionHandler, invoiceHandler, companyHandler, cfg.Port)
 
 	addr := ":" + cfg.Port
 	log.Printf("listening on %s", addr)

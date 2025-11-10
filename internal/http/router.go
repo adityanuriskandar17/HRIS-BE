@@ -10,7 +10,7 @@ import (
 
 type HandlerRegistrar func(r chi.Router)
 
-func NewRouter(register HandlerRegistrar, tenantHandler *handler.TenantHandler, subscriptionHandler *handler.SubscriptionHandler, invoiceHandler *handler.InvoiceHandler, port string) http.Handler {
+func NewRouter(register HandlerRegistrar, tenantHandler *handler.TenantHandler, subscriptionHandler *handler.SubscriptionHandler, invoiceHandler *handler.InvoiceHandler, companyHandler *handler.CompanyHandler, port string) http.Handler {
 	r := chi.NewRouter()
 	r.Use(chimw.RequestID, chimw.RealIP, chimw.Logger, chimw.Recoverer)
 
@@ -50,6 +50,15 @@ func NewRouter(register HandlerRegistrar, tenantHandler *handler.TenantHandler, 
 		invoice.Put("/{id}", invoiceHandler.Update)
 		invoice.Post("/{id}/send", invoiceHandler.Send)
 		invoice.Post("/{id}/pay", invoiceHandler.Pay)
+	})
+
+	r.Route("/companies", func(company chi.Router) {
+		company.Use(chimw.RealIP, chimw.Logger, chimw.Recoverer)
+		company.Get("/{id}", companyHandler.GetCompanyProfile)
+		company.Patch("/{id}", companyHandler.UpdateCompanyProfile)
+		company.Get("/{id}/settings", companyHandler.GetCompanySettings)
+		company.Patch("/{id}/settings", companyHandler.UpdateCompanySettings)
+		company.Get("/{id}/limits", companyHandler.GetCompanyLimits)
 	})
 
 	// Swagger documentation route
