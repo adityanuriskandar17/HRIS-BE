@@ -101,7 +101,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Param request body dto.RegisterRequest true "User registration data"
-// @Success 201 {object} dto.UserResponse
+// @Success 201 {object} dto.LoginResponse
 // @Failure 400 {object} string
 // @Failure 500 {object} string
 // @Router /auth/register [post]

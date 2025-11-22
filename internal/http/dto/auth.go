@@ -1,9 +1,10 @@
+// Package dto contains data transfer objects for HTTP requests and responses.
 package dto
 
 // LoginRequest represents the request body for login
 type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" example:"john.doe@example.com"`
+	Password string `json:"password" example:"SecurePass123!"`
 }
 
 // LoginResponse represents the response body for login
@@ -14,21 +15,21 @@ type LoginResponse struct {
 
 // RegisterRequest represents the request body for registration
 type RegisterRequest struct {
-	Email     string              `json:"email"`
-	Password  string              `json:"password"`
-	FirstName string              `json:"firstName"`
-	LastName  string              `json:"lastName"`
-	TenantID  string              `json:"tenantId,omitempty"`
+	Email     string              `json:"email" example:"john.doe@example.com"`
+	Password  string              `json:"password" example:"SecurePass123!"`
+	FirstName string              `json:"firstName" example:"John"`
+	LastName  string              `json:"lastName" example:"Doe"`
+	TenantID  string              `json:"tenantId,omitempty" example:""`
 	Tenant    *TenantRegistration `json:"tenant,omitempty"`
 }
 
 // TenantRegistration captures tenant details when an admin signs up and
 // provisions a new tenant.
 type TenantRegistration struct {
-	Name        string `json:"name"`
-	Email       string `json:"email"`
-	CompanyName string `json:"companyName"`
-	Domain      string `json:"domain"`
+	Name        string `json:"name" example:"John Doe"`
+	Email       string `json:"email" example:"admin@acmecorp.com"`
+	CompanyName string `json:"companyName" example:"Acme Corporation"`
+	Domain      string `json:"domain" example:"acmecorp.com"`
 }
 
 // UserResponse represents the user information in responses
@@ -51,8 +52,8 @@ type TokenResponse struct {
 
 // CreateEmployeeAccountRequest represents admin-triggered user creation payload.
 type CreateEmployeeAccountRequest struct {
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
+	Email     string `json:"email" example:"employee@acmecorp.com"`
+	Password  string `json:"password" example:"EmployeePass123!"`
+	FirstName string `json:"firstName" example:"Jane"`
+	LastName  string `json:"lastName" example:"Smith"`
 }

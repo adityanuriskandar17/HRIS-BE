@@ -2138,16 +2138,20 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "employee@acmecorp.com"
                 },
                 "firstName": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Jane"
                 },
                 "lastName": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Smith"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "EmployeePass123!"
                 }
             }
         },
@@ -2246,10 +2250,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "john.doe@example.com"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "SecurePass123!"
                 }
             }
         },
@@ -2288,22 +2294,27 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "john.doe@example.com"
                 },
                 "firstName": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "John"
                 },
                 "lastName": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Doe"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "SecurePass123!"
                 },
                 "tenant": {
                     "$ref": "#/definitions/dto.TenantRegistration"
                 },
                 "tenantId": {
-                    "type": "string"
+                    "type": "string",
+                    "example": ""
                 }
             }
         },
@@ -2435,16 +2446,20 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "companyName": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Acme Corporation"
                 },
                 "domain": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "acmecorp.com"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "admin@acmecorp.com"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "John Doe"
                 }
             }
         },
@@ -2793,6 +2808,14 @@ const docTemplate = `{
                     "type": "boolean"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Type \"Bearer\" followed by a space and JWT token.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

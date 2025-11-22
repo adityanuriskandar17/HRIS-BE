@@ -1,7 +1,10 @@
-.PHONY: run tidy up down fmt lint test install-hooks
+.PHONY: run tidy up down fmt lint test install-hooks dev
 
 run:
 	go run ./cmd/api
+
+dev:
+	export PATH=$$PATH:$$(go env GOPATH)/bin && air
 
 tidy:
 	go mod tidy

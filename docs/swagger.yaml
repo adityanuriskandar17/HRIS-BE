@@ -83,12 +83,16 @@ definitions:
   dto.CreateEmployeeAccountRequest:
     properties:
       email:
+        example: employee@acmecorp.com
         type: string
       firstName:
+        example: Jane
         type: string
       lastName:
+        example: Smith
         type: string
       password:
+        example: EmployeePass123!
         type: string
     type: object
   dto.CreateTenantRequest:
@@ -156,8 +160,10 @@ definitions:
   dto.LoginRequest:
     properties:
       email:
+        example: john.doe@example.com
         type: string
       password:
+        example: SecurePass123!
         type: string
     type: object
   dto.PayInvoiceRequest:
@@ -183,16 +189,21 @@ definitions:
   dto.RegisterRequest:
     properties:
       email:
+        example: john.doe@example.com
         type: string
       firstName:
+        example: John
         type: string
       lastName:
+        example: Doe
         type: string
       password:
+        example: SecurePass123!
         type: string
       tenant:
         $ref: '#/definitions/dto.TenantRegistration'
       tenantId:
+        example: ""
         type: string
     type: object
   dto.RenewSubscriptionRequest:
@@ -282,12 +293,16 @@ definitions:
   dto.TenantRegistration:
     properties:
       companyName:
+        example: Acme Corporation
         type: string
       domain:
+        example: acmecorp.com
         type: string
       email:
+        example: admin@acmecorp.com
         type: string
       name:
+        example: John Doe
         type: string
     type: object
   dto.UnitRequest:
@@ -1842,4 +1857,10 @@ paths:
       summary: Update a tenant
       tags:
       - tenants
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

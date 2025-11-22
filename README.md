@@ -9,6 +9,26 @@ make up # start db & api
 # or: go run ./cmd/api
 ```
 
+## Development Mode (Auto-Reload)
+
+Untuk development dengan auto-reload dan auto-regenerate Swagger docs:
+
+```bash
+make dev
+```
+
+Ini akan:
+- ✅ Auto-regenerate Swagger docs ketika ada perubahan di handler/DTO
+- ✅ Auto-reload server ketika ada perubahan kode
+- ✅ Watch file `.go` dan rebuild otomatis
+
+**Catatan:** Setelah perubahan kode, Swagger docs akan ter-update otomatis. Anda hanya perlu **refresh browser** di halaman Swagger UI untuk melihat perubahan.
+
+**Alternatif tanpa auto-reload:**
+```bash
+make run  # Manual run, perlu restart manual
+```
+
 ## Git Hooks Setup
 
 This project includes Git hooks to ensure code quality and consistency:
