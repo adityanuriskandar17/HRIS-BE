@@ -20,16 +20,14 @@ type Service struct {
 	jwtSecret  string
 	accessTTL  time.Duration
 	refreshTTL time.Duration
-	tenantID   string
 }
 
-func NewService(db *gorm.DB, secret string, accessTTL, refreshTTL time.Duration, tenantID string) *Service {
+func NewService(db *gorm.DB, secret string, accessTTL, refreshTTL time.Duration) *Service {
 	return &Service{
 		db:         db,
 		jwtSecret:  secret,
 		accessTTL:  accessTTL,
 		refreshTTL: refreshTTL,
-		tenantID:   tenantID,
 	}
 }
 
@@ -38,7 +36,7 @@ func (s *Service) IssueTokenPair(user *model.UserAccount) (*TokenPair, error) {
 		return nil, errors.New("user required")
 	}
 
-	accessToken, accessExp, err := SignAccessToken(user.ID.String(), string(user.Role), s.jwtSecret, s.accessTTL, s.tenantID)
+	accessToken, accessExp, err := SignAccessToken(user.ID.String(), string(user.Role), s.jwtSecret, s.accessTTL, user.TenantID.String())
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +97,7 @@ func (s *Service) RotateRefreshToken(plain string) (*TokenPair, *model.UserAccou
 
 		user = stored.User
 
-		accessToken, accessExp, err := SignAccessToken(user.ID.String(), string(user.Role), s.jwtSecret, s.accessTTL, s.tenantID)
+		accessToken, accessExp, err := SignAccessToken(user.ID.String(), string(user.Role), s.jwtSecret, s.accessTTL, user.TenantID.String())
 		if err != nil {
 			return err
 		}

@@ -28,7 +28,6 @@ type TelemetryConfig struct {
 type AuthConfig struct {
 	AccessTokenTTL  time.Duration
 	RefreshTokenTTL time.Duration
-	TenantID        string
 	AllowedOrigins  []string
 }
 
@@ -53,7 +52,6 @@ func Load() (*Config, error) {
 		Auth: AuthConfig{
 			AccessTokenTTL:  accessTTL,
 			RefreshTokenTTL: refreshTTL,
-			TenantID:        get("TENANT_ID", ""),
 			AllowedOrigins:  parseCSV(get("CORS_ALLOWED_ORIGINS", "")),
 		},
 		Telemetry: TelemetryConfig{

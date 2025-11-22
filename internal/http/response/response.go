@@ -42,3 +42,36 @@ func ReadJSON(r *http.Request, v interface{}) error {
 	decoder := json.NewDecoder(r.Body)
 	return decoder.Decode(v)
 }
+
+// Meta represents metadata in API responses
+type Meta struct {
+	TraceID string `json:"trace_id,omitempty"`
+}
+
+// ErrorDetail represents error information in API responses
+type ErrorDetail struct {
+	Code    string            `json:"code"`
+	Message string            `json:"message"`
+	Fields  map[string]string `json:"fields,omitempty"`
+}
+
+// EnvelopeResponse is the standard envelope for all API responses
+type EnvelopeResponse struct {
+	Success bool         `json:"success"`
+	Data    interface{}  `json:"data,omitempty"`
+	Error   *ErrorDetail `json:"error,omitempty"`
+	Meta    Meta         `json:"meta"`
+}
+
+// TokenResponseEnvelope wraps TokenResponse in the standard envelope
+type TokenResponseEnvelope struct {
+	Success bool `json:"success"`
+	Data    struct {
+		AccessToken      string `json:"accessToken"`
+		RefreshToken     string `json:"refreshToken"`
+		ExpiresIn        int64  `json:"expiresIn"`
+		RefreshExpiresIn int64  `json:"refreshExpiresIn"`
+		Role             string `json:"role"`
+	} `json:"data"`
+	Meta Meta `json:"meta"`
+}

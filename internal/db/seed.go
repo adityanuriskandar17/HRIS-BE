@@ -11,6 +11,12 @@ import (
 
 // SeedReferenceData ensures a minimal set of master data exists for development.
 func SeedReferenceData(gdb *gorm.DB, adminEmail, adminPassword string) error {
+	if err := seedTenants(gdb); err != nil {
+		return err
+	}
+	if err := seedCompanies(gdb); err != nil {
+		return err
+	}
 	if err := seedUnits(gdb); err != nil {
 		return err
 	}
@@ -22,6 +28,60 @@ func SeedReferenceData(gdb *gorm.DB, adminEmail, adminPassword string) error {
 	}
 	if err := seedUserAccounts(gdb, adminEmail, adminPassword); err != nil {
 		return err
+	}
+	return nil
+}
+
+func seedTenants(db *gorm.DB) error {
+	tenants := []model.Tenant{
+		{
+			Name:        "Default Tenant",
+			Email:       "tenant@example.com",
+			CompanyName: "Default Company",
+			Domain:      "default.local",
+		},
+	}
+
+	for _, tenant := range tenants {
+		var existingTenant model.Tenant
+		if err := db.Where("email = ?", tenant.Email).First(&existingTenant).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				if err := db.Create(&tenant).Error; err != nil {
+					log.Printf("Failed to seed tenant %s: %v", tenant.Email, err)
+					return err
+				}
+			} else {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func seedCompanies(db *gorm.DB) error {
+	// Get the first tenant to associate with companies
+	var tenant model.Tenant
+	if err := db.First(&tenant).Error; err != nil {
+		log.Printf("Failed to get tenant for seeding companies: %v", err)
+		return err
+	}
+
+	companies := []model.Company{
+		{Name: "Default Company", TenantID: tenant.ID},
+	}
+
+	for _, company := range companies {
+		var existingCompany model.Company
+		if err := db.Where("name = ? AND tenant_id = ?", company.Name, company.TenantID).First(&existingCompany).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				if err := db.Create(&company).Error; err != nil {
+					log.Printf("Failed to seed company %s: %v", company.Name, err)
+					return err
+				}
+			} else {
+				return err
+			}
+		}
 	}
 	return nil
 }

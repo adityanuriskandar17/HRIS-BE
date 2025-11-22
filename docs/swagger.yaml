@@ -1,135 +1,86 @@
 basePath: /api/v1
 definitions:
-  github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Employee:
-    properties:
-      createdAt:
-        type: string
-      createdById:
-        type: string
-      dateOfBirth:
-        type: string
-      email:
-        type: string
-      employeeCode:
-        type: string
-      employmentStatus:
-        $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.EmploymentStatus'
-      endDate:
-        type: string
-      fullName:
-        type: string
-      id:
-        type: string
-      phone:
-        type: string
-      position:
-        $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Position'
-      positionId:
-        type: string
-      startDate:
-        type: string
-      unit:
-        $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Unit'
-      unitId:
-        type: string
-      updatedAt:
-        type: string
-      updatedById:
-        type: string
-    type: object
-  github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.EmploymentStatus:
-    enum:
-    - FULLTIME
-    - CONTRACT
-    - INTERN
-    - PARTTIME
-    type: string
-    x-enum-varnames:
-    - EmploymentFullTime
-    - EmploymentContract
-    - EmploymentIntern
-    - EmploymentPartTime
-  github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Invoice:
-    properties:
-      amount:
-        type: number
-      createdAt:
-        type: string
-      dueDate:
-        type: string
-      id:
-        type: string
-      invoiceNumber:
-        type: string
-      paidAt:
-        type: string
-      paymentId:
-        type: string
-      sentAt:
-        type: string
-      status:
-        $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.InvoiceStatus'
-      subscriptionId:
-        type: string
-      tenantId:
-        type: string
-      updatedAt:
-        type: string
-    type: object
-  github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.InvoiceStatus:
-    enum:
-    - draft
-    - sent
-    - paid
-    - overdue
-    - canceled
-    type: string
-    x-enum-varnames:
-    - InvoiceStatusDraft
-    - InvoiceStatusSent
-    - InvoiceStatusPaid
-    - InvoiceStatusOverdue
-    - InvoiceStatusCanceled
-  github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Position:
-    properties:
-      companyId:
-        type: string
-      createdAt:
-        type: string
-      description:
-        type: string
-      id:
-        type: string
-      level:
-        type: integer
-      title:
-        type: string
-      updatedAt:
-        type: string
-    type: object
-  github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Unit:
-    properties:
-      code:
-        type: string
-      createdAt:
-        type: string
-      createdById:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      updatedAt:
-        type: string
-      updatedById:
-        type: string
-    type: object
-  github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.CancelSubscriptionRequest:
+  dto.CancelSubscriptionRequest:
     properties:
       reason:
         type: string
     type: object
-  github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.CreateTenantRequest:
+  dto.CompanyDTO:
+    properties:
+      address:
+        example: 123 Main St, Anytown, USA
+        type: string
+      createdAt:
+        example: "2023-01-01T00:00:00Z"
+        type: string
+      currency:
+        example: USD
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: Acme Corp
+        type: string
+      registrationNo:
+        example: "123456789"
+        type: string
+      tenantId:
+        example: 123e4567-e89b-12d3-a456-426614174001
+        type: string
+      timezone:
+        example: UTC
+        type: string
+      updatedAt:
+        example: "2023-01-01T00:00:00Z"
+        type: string
+    type: object
+  dto.CompanyLimitsDTO:
+    properties:
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      maxDepartments:
+        example: 10
+        type: integer
+      maxEmployees:
+        example: 100
+        type: integer
+      maxPositions:
+        example: 50
+        type: integer
+      name:
+        example: Acme Corp
+        type: string
+      tenantId:
+        example: 123e4567-e89b-12d3-a456-426614174001
+        type: string
+    type: object
+  dto.CompanySettingsDTO:
+    properties:
+      address:
+        example: 123 Main St, Anytown, USA
+        type: string
+      currency:
+        example: USD
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: Acme Corp
+        type: string
+      registrationNo:
+        example: "123456789"
+        type: string
+      tenantId:
+        example: 123e4567-e89b-12d3-a456-426614174001
+        type: string
+      timezone:
+        example: UTC
+        type: string
+    type: object
+  dto.CreateTenantRequest:
     properties:
       companyName:
         example: Acme Corp
@@ -149,7 +100,7 @@ definitions:
     - email
     - name
     type: object
-  github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.EmployeeRequest:
+  dto.EmployeeRequest:
     properties:
       email:
         type: string
@@ -164,7 +115,7 @@ definitions:
       unitId:
         type: string
     type: object
-  github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.InvoiceResponse:
+  dto.InvoiceResponse:
     properties:
       amount:
         type: number
@@ -191,21 +142,14 @@ definitions:
       updatedAt:
         type: string
     type: object
-  github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.LoginRequest:
+  dto.LoginRequest:
     properties:
       email:
         type: string
       password:
         type: string
     type: object
-  github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.LoginResponse:
-    properties:
-      token:
-        type: string
-      user:
-        $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.UserResponse'
-    type: object
-  github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.PayInvoiceRequest:
+  dto.PayInvoiceRequest:
     properties:
       paymentId:
         type: string
@@ -214,7 +158,7 @@ definitions:
       transactionId:
         type: string
     type: object
-  github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.PositionRequest:
+  dto.PositionRequest:
     properties:
       companyId:
         type: string
@@ -225,7 +169,7 @@ definitions:
       title:
         type: string
     type: object
-  github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.RegisterRequest:
+  dto.RegisterRequest:
     properties:
       email:
         type: string
@@ -235,8 +179,33 @@ definitions:
         type: string
       password:
         type: string
+      tenant:
+        $ref: '#/definitions/dto.TenantRegistration'
+      tenantId:
+        type: string
     type: object
-  github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.RenewSubscriptionRequest:
+    example:
+      email: admin@acme.io
+      firstName: Alice
+      lastName: Admin
+      password: secret123
+      tenant:
+        companyName: Acme Corporation
+        domain: acme.io
+        email: owner@acme.io
+        name: Acme HQ
+  dto.TenantRegistration:
+    properties:
+      companyName:
+        type: string
+      domain:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+    type: object
+  dto.RenewSubscriptionRequest:
     properties:
       billingCycle:
         type: string
@@ -245,12 +214,12 @@ definitions:
       paymentMethod:
         type: string
     type: object
-  github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SendInvoiceRequest:
+  dto.SendInvoiceRequest:
     properties:
       email:
         type: string
     type: object
-  github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SubscriptionRequest:
+  dto.SubscriptionRequest:
     properties:
       billingCycle:
         description: monthly, yearly
@@ -268,7 +237,7 @@ definitions:
       tenantId:
         type: string
     type: object
-  github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SubscriptionResponse:
+  dto.SubscriptionResponse:
     properties:
       billingCycle:
         type: string
@@ -293,7 +262,7 @@ definitions:
       updatedAt:
         type: string
     type: object
-  github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.TenantDTO:
+  dto.TenantDTO:
     properties:
       active:
         example: true
@@ -320,14 +289,50 @@ definitions:
         example: "2023-01-01T00:00:00Z"
         type: string
     type: object
-  github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.UnitRequest:
+  dto.UnitRequest:
     properties:
       code:
         type: string
       name:
         type: string
     type: object
-  github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.UpdateTenantRequest:
+  dto.UpdateCompanyRequest:
+    properties:
+      address:
+        example: 456 Oak Ave, Anytown, USA
+        type: string
+      currency:
+        example: EUR
+        type: string
+      name:
+        example: Acme Inc
+        type: string
+      registrationNo:
+        example: "987654321"
+        type: string
+      timezone:
+        example: America/New_York
+        type: string
+    type: object
+  dto.UpdateCompanySettingsRequest:
+    properties:
+      address:
+        example: 456 Oak Ave, Anytown, USA
+        type: string
+      currency:
+        example: EUR
+        type: string
+      name:
+        example: Acme Inc
+        type: string
+      registrationNo:
+        example: "987654321"
+        type: string
+      timezone:
+        example: America/New_York
+        type: string
+    type: object
+  dto.UpdateTenantRequest:
     properties:
       active:
         example: false
@@ -345,7 +350,7 @@ definitions:
         example: John Smith
         type: string
     type: object
-  github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.UserResponse:
+  dto.UserResponse:
     properties:
       email:
         type: string
@@ -358,7 +363,169 @@ definitions:
       lastName:
         type: string
     type: object
-host: localhost:8080
+  handler.refreshReq:
+    properties:
+      refreshToken:
+        type: string
+    type: object
+  model.Employee:
+    properties:
+      createdAt:
+        type: string
+      createdById:
+        type: string
+      dateOfBirth:
+        type: string
+      email:
+        type: string
+      employeeCode:
+        type: string
+      employmentStatus:
+        $ref: '#/definitions/model.EmploymentStatus'
+      endDate:
+        type: string
+      fullName:
+        type: string
+      id:
+        type: string
+      phone:
+        type: string
+      position:
+        $ref: '#/definitions/model.Position'
+      positionId:
+        type: string
+      startDate:
+        type: string
+      unit:
+        $ref: '#/definitions/model.Unit'
+      unitId:
+        type: string
+      updatedAt:
+        type: string
+      updatedById:
+        type: string
+    type: object
+  model.EmploymentStatus:
+    enum:
+    - FULLTIME
+    - CONTRACT
+    - INTERN
+    - PARTTIME
+    type: string
+    x-enum-varnames:
+    - EmploymentFullTime
+    - EmploymentContract
+    - EmploymentIntern
+    - EmploymentPartTime
+  model.Invoice:
+    properties:
+      amount:
+        type: number
+      createdAt:
+        type: string
+      dueDate:
+        type: string
+      id:
+        type: string
+      invoiceNumber:
+        type: string
+      paidAt:
+        type: string
+      paymentId:
+        type: string
+      sentAt:
+        type: string
+      status:
+        $ref: '#/definitions/model.InvoiceStatus'
+      subscriptionId:
+        type: string
+      tenantId:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  model.InvoiceStatus:
+    enum:
+    - draft
+    - sent
+    - paid
+    - overdue
+    - canceled
+    type: string
+    x-enum-varnames:
+    - InvoiceStatusDraft
+    - InvoiceStatusSent
+    - InvoiceStatusPaid
+    - InvoiceStatusOverdue
+    - InvoiceStatusCanceled
+  model.Position:
+    properties:
+      companyId:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      level:
+        type: integer
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  model.Unit:
+    properties:
+      code:
+        type: string
+      createdAt:
+        type: string
+      createdById:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+      updatedById:
+        type: string
+    type: object
+  response.Meta:
+    properties:
+      trace_id:
+        type: string
+    type: object
+  response.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  response.TokenResponseEnvelope:
+    properties:
+      data:
+        properties:
+          accessToken:
+            type: string
+          expiresIn:
+            type: integer
+          refreshExpiresIn:
+            type: integer
+          refreshToken:
+            type: string
+          role:
+            type: string
+        type: object
+      meta:
+        $ref: '#/definitions/response.Meta'
+      success:
+        type: boolean
+    type: object
+host: localhost:8081
 info:
   contact: {}
   description: Human Resource Information System API
@@ -376,14 +543,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.LoginRequest'
+          $ref: '#/definitions/dto.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.LoginResponse'
+            $ref: '#/definitions/response.TokenResponseEnvelope'
         "400":
           description: Bad Request
           schema:
@@ -410,7 +577,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.UserResponse'
+            $ref: '#/definitions/dto.UserResponse'
         "401":
           description: Unauthorized
           schema:
@@ -420,6 +587,40 @@ paths:
           schema:
             type: string
       summary: Get user profile
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh access token using refresh token
+      parameters:
+      - description: Refresh token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.refreshReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.TokenResponseEnvelope'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Refresh access token
       tags:
       - auth
   /auth/register:
@@ -433,14 +634,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.RegisterRequest'
+          $ref: '#/definitions/dto.RegisterRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.UserResponse'
+            $ref: '#/definitions/dto.UserResponse'
         "400":
           description: Bad Request
           schema:
@@ -452,6 +653,206 @@ paths:
       summary: Register a new user
       tags:
       - auth
+  /companies/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get company profile by ID
+      parameters:
+      - description: Company ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CompanyDTO'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get company profile
+      tags:
+      - companies
+    patch:
+      consumes:
+      - application/json
+      description: Update company profile by ID
+      parameters:
+      - description: Company ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update company request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateCompanyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CompanyDTO'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Update company profile
+      tags:
+      - companies
+  /companies/{id}/limits:
+    get:
+      consumes:
+      - application/json
+      description: Get company limits based on subscription plan
+      parameters:
+      - description: Company ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CompanyLimitsDTO'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get company limits
+      tags:
+      - companies
+  /companies/{id}/settings:
+    get:
+      consumes:
+      - application/json
+      description: Get company settings by ID
+      parameters:
+      - description: Company ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CompanySettingsDTO'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get company settings
+      tags:
+      - companies
+    patch:
+      consumes:
+      - application/json
+      description: Update company settings by ID
+      parameters:
+      - description: Company ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update company settings request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateCompanySettingsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CompanySettingsDTO'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Update company settings
+      tags:
+      - companies
   /invoices:
     get:
       consumes:
@@ -477,7 +878,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.InvoiceResponse'
+              $ref: '#/definitions/dto.InvoiceResponse'
             type: array
         "500":
           description: Internal Server Error
@@ -498,14 +899,14 @@ paths:
         name: invoice
         required: true
         schema:
-          $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Invoice'
+          $ref: '#/definitions/model.Invoice'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.InvoiceResponse'
+            $ref: '#/definitions/dto.InvoiceResponse'
         "400":
           description: Bad Request
           schema:
@@ -538,7 +939,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.InvoiceResponse'
+            $ref: '#/definitions/dto.InvoiceResponse'
         "400":
           description: Bad Request
           schema:
@@ -575,14 +976,14 @@ paths:
         name: invoice
         required: true
         schema:
-          $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Invoice'
+          $ref: '#/definitions/model.Invoice'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.InvoiceResponse'
+            $ref: '#/definitions/dto.InvoiceResponse'
         "400":
           description: Bad Request
           schema:
@@ -620,7 +1021,7 @@ paths:
         name: pay
         required: true
         schema:
-          $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.PayInvoiceRequest'
+          $ref: '#/definitions/dto.PayInvoiceRequest'
       produces:
       - application/json
       responses:
@@ -667,7 +1068,7 @@ paths:
         name: send
         required: true
         schema:
-          $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SendInvoiceRequest'
+          $ref: '#/definitions/dto.SendInvoiceRequest'
       produces:
       - application/json
       responses:
@@ -716,7 +1117,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.InvoiceResponse'
+              $ref: '#/definitions/dto.InvoiceResponse'
             type: array
         "400":
           description: Bad Request
@@ -745,7 +1146,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Employee'
+              $ref: '#/definitions/model.Employee'
             type: array
         "500":
           description: Internal Server Error
@@ -764,14 +1165,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.EmployeeRequest'
+          $ref: '#/definitions/dto.EmployeeRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Employee'
+            $ref: '#/definitions/model.Employee'
         "400":
           description: Bad Request
           schema:
@@ -828,7 +1229,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Employee'
+            $ref: '#/definitions/model.Employee'
         "400":
           description: Bad Request
           schema:
@@ -855,14 +1256,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.EmployeeRequest'
+          $ref: '#/definitions/dto.EmployeeRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Employee'
+            $ref: '#/definitions/model.Employee'
         "400":
           description: Bad Request
           schema:
@@ -886,7 +1287,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Position'
+              $ref: '#/definitions/model.Position'
             type: array
         "500":
           description: Internal Server Error
@@ -905,14 +1306,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.PositionRequest'
+          $ref: '#/definitions/dto.PositionRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Position'
+            $ref: '#/definitions/model.Position'
         "400":
           description: Bad Request
           schema:
@@ -936,7 +1337,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Unit'
+              $ref: '#/definitions/model.Unit'
             type: array
         "500":
           description: Internal Server Error
@@ -955,14 +1356,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.UnitRequest'
+          $ref: '#/definitions/dto.UnitRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Unit'
+            $ref: '#/definitions/model.Unit'
         "400":
           description: Bad Request
           schema:
@@ -986,7 +1387,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SubscriptionResponse'
+              $ref: '#/definitions/dto.SubscriptionResponse'
             type: array
         "500":
           description: Internal Server Error
@@ -1007,14 +1408,14 @@ paths:
         name: subscription
         required: true
         schema:
-          $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SubscriptionRequest'
+          $ref: '#/definitions/dto.SubscriptionRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SubscriptionResponse'
+            $ref: '#/definitions/dto.SubscriptionResponse'
         "400":
           description: Bad Request
           schema:
@@ -1047,7 +1448,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SubscriptionResponse'
+            $ref: '#/definitions/dto.SubscriptionResponse'
         "400":
           description: Bad Request
           schema:
@@ -1084,14 +1485,14 @@ paths:
         name: subscription
         required: true
         schema:
-          $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SubscriptionRequest'
+          $ref: '#/definitions/dto.SubscriptionRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SubscriptionResponse'
+            $ref: '#/definitions/dto.SubscriptionResponse'
         "400":
           description: Bad Request
           schema:
@@ -1129,7 +1530,7 @@ paths:
         name: cancel
         required: true
         schema:
-          $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.CancelSubscriptionRequest'
+          $ref: '#/definitions/dto.CancelSubscriptionRequest'
       produces:
       - application/json
       responses:
@@ -1176,14 +1577,14 @@ paths:
         name: renew
         required: true
         schema:
-          $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.RenewSubscriptionRequest'
+          $ref: '#/definitions/dto.RenewSubscriptionRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SubscriptionResponse'
+            $ref: '#/definitions/dto.SubscriptionResponse'
         "400":
           description: Bad Request
           schema:
@@ -1223,7 +1624,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SubscriptionResponse'
+              $ref: '#/definitions/dto.SubscriptionResponse'
             type: array
         "400":
           description: Bad Request
@@ -1252,7 +1653,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.TenantDTO'
+              $ref: '#/definitions/dto.TenantDTO'
             type: array
         "500":
           description: Internal Server Error
@@ -1273,14 +1674,14 @@ paths:
         name: tenant
         required: true
         schema:
-          $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.CreateTenantRequest'
+          $ref: '#/definitions/dto.CreateTenantRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.TenantDTO'
+            $ref: '#/definitions/dto.TenantDTO'
         "400":
           description: Bad Request
           schema:
@@ -1313,7 +1714,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.TenantDTO'
+            $ref: '#/definitions/dto.TenantDTO'
         "400":
           description: Bad Request
           schema:
@@ -1344,14 +1745,14 @@ paths:
         name: tenant
         required: true
         schema:
-          $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.UpdateTenantRequest'
+          $ref: '#/definitions/dto.UpdateTenantRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.TenantDTO'
+            $ref: '#/definitions/dto.TenantDTO'
         "400":
           description: Bad Request
           schema:

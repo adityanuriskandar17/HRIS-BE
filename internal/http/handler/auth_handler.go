@@ -2,11 +2,15 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
+
 	"github.com/adityanuriskandar17/HRIS-BE/internal/auth"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/domain/model"
+	"github.com/adityanuriskandar17/HRIS-BE/internal/domain/services"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/http/dto"
 	httpx "github.com/adityanuriskandar17/HRIS-BE/internal/http/httputils"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/repository"
@@ -16,23 +20,19 @@ import (
 )
 
 type AuthHandler struct {
-	userRepo repository.UserAccountRepository
-	tokens   *auth.Service
+	userRepo  repository.UserAccountRepository
+	tenantSvc services.TenantService
+	tokens    *auth.Service
 }
 
-func NewAuthHandler(userRepo repository.UserAccountRepository, tokens *auth.Service) *AuthHandler {
+var errTenantCreate = errors.New("tenant creation failed")
+
+func NewAuthHandler(userRepo repository.UserAccountRepository, tenantSvc services.TenantService, tokens *auth.Service) *AuthHandler {
 	return &AuthHandler{
-		userRepo: userRepo,
-		tokens:   tokens,
+		userRepo:  userRepo,
+		tenantSvc: tenantSvc,
+		tokens:    tokens,
 	}
-}
-
-type tokenResponse struct {
-	AccessToken      string `json:"accessToken"`
-	RefreshToken     string `json:"refreshToken"`
-	ExpiresIn        int64  `json:"expiresIn"`
-	RefreshExpiresIn int64  `json:"refreshExpiresIn"`
-	Role             string `json:"role"`
 }
 
 type refreshReq struct {
@@ -46,7 +46,7 @@ type refreshReq struct {
 // @Accept json
 // @Produce json
 // @Param request body dto.LoginRequest true "Login credentials"
-// @Success 200 {object} dto.LoginResponse
+// @Success 200 {object} response.TokenResponseEnvelope
 // @Failure 400 {object} string
 // @Failure 401 {object} string
 // @Failure 500 {object} string
@@ -83,7 +83,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := tokenResponse{
+	resp := dto.TokenResponse{
 		AccessToken:      pair.AccessToken,
 		RefreshToken:     pair.RefreshToken,
 		ExpiresIn:        secondsUntil(pair.AccessExpiresAt),
@@ -111,6 +111,16 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	tenantID, role, err := h.resolveTenant(registerReq)
+	if err != nil {
+		var status = http.StatusBadRequest
+		if errors.Is(err, errTenantCreate) {
+			status = http.StatusInternalServerError
+		}
+		httpx.Error(w, r, status, "TENANT_RESOLUTION_FAILED", err.Error(), nil)
+		return
+	}
+
 	// Hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registerReq.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -120,10 +130,13 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	// Create user
 	user := model.UserAccount{
+		TenantID:     tenantID,
 		Email:        registerReq.Email,
 		PasswordHash: string(hashedPassword),
 		FirstName:    registerReq.FirstName,
 		LastName:     registerReq.LastName,
+		Role:         role,
+		IsActive:     true,
 	}
 
 	createdUser, err := h.userRepo.Create(r.Context(), user)
@@ -160,7 +173,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	// Upstream implementation:
 	// loginRes := dto.LoginResponse{ Token: token, User: ... }
 	// json.NewEncoder(w).Encode(loginRes)
-	
+
 	// I will stick to upstream `dto.LoginResponse` for now to avoid breaking changes if frontend expects that.
 	// But `dto.LoginResponse` likely doesn't have RefreshToken.
 	// If I want to support refresh tokens, I should update `dto.LoginResponse` or use `tokenResponse`.
@@ -173,12 +186,67 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	// But `Register` also returns User info in upstream.
 	// Stashed `Login` returns `tokenResponse` which has `Role` but not full User info.
 	// Upstream `Login` returns `dto.LoginResponse` which has `User` info.
-	
+
 	// Compromise: I will use `dto.LoginResponse` but I might need to add RefreshToken to it later.
 	// For now, I'll just set `Token` to `pair.AccessToken`.
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(loginRes)
+}
+
+func (h *AuthHandler) resolveTenant(req dto.RegisterRequest) (uuid.UUID, model.UserRole, error) {
+	tenantIDStr := strings.TrimSpace(req.TenantID)
+
+	switch {
+	case tenantIDStr != "" && req.Tenant != nil:
+		return uuid.Nil, model.RoleEmployee, fmt.Errorf("provide either tenantId or tenant payload, not both")
+	case tenantIDStr != "":
+		id, err := uuid.Parse(tenantIDStr)
+		if err != nil {
+			return uuid.Nil, model.RoleEmployee, fmt.Errorf("tenantId must be a valid UUID")
+		}
+		return id, model.RoleEmployee, nil
+	case req.Tenant == nil:
+		return uuid.Nil, model.RoleEmployee, fmt.Errorf("tenantId or tenant payload is required")
+	default:
+		if err := validateTenantRegistration(req.Tenant); err != nil {
+			return uuid.Nil, model.RoleEmployee, err
+		}
+
+		tenant := &model.Tenant{
+			Name:        strings.TrimSpace(req.Tenant.Name),
+			Email:       strings.TrimSpace(req.Tenant.Email),
+			CompanyName: strings.TrimSpace(req.Tenant.CompanyName),
+			Domain:      strings.TrimSpace(req.Tenant.Domain),
+		}
+
+		if err := h.tenantSvc.Create(tenant); err != nil {
+			return uuid.Nil, model.RoleEmployee, fmt.Errorf("%w: %v", errTenantCreate, err)
+		}
+
+		return tenant.ID, model.RoleAdmin, nil
+	}
+}
+
+func validateTenantRegistration(tenant *dto.TenantRegistration) error {
+	if tenant == nil {
+		return fmt.Errorf("tenant payload is required")
+	}
+
+	if strings.TrimSpace(tenant.Name) == "" {
+		return fmt.Errorf("tenant.name is required")
+	}
+	if strings.TrimSpace(tenant.Email) == "" {
+		return fmt.Errorf("tenant.email is required")
+	}
+	if strings.TrimSpace(tenant.CompanyName) == "" {
+		return fmt.Errorf("tenant.companyName is required")
+	}
+	if strings.TrimSpace(tenant.Domain) == "" {
+		return fmt.Errorf("tenant.domain is required")
+	}
+
+	return nil
 }
 
 // Profile handles user profile retrieval
@@ -220,6 +288,18 @@ func (h *AuthHandler) Profile(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(userRes)
 }
 
+// Refresh handles token refresh
+// @Summary Refresh access token
+// @Description Refresh access token using refresh token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body refreshReq true "Refresh token"
+// @Success 200 {object} response.TokenResponseEnvelope
+// @Failure 400 {object} string
+// @Failure 401 {object} string
+// @Failure 500 {object} string
+// @Router /auth/refresh [post]
 func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	var req refreshReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -245,7 +325,7 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := tokenResponse{
+	resp := dto.TokenResponse{
 		AccessToken:      pair.AccessToken,
 		RefreshToken:     pair.RefreshToken,
 		ExpiresIn:        secondsUntil(pair.AccessExpiresAt),

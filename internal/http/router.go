@@ -18,17 +18,21 @@ func NewRouter(allowedOrigins []string, register HandlerRegistrar, tenantHandler
 	r := chi.NewRouter()
 	r.Use(chimw.RequestID, chimw.RealIP)
 
-	if len(allowedOrigins) > 0 {
-		corsOpts := cors.Options{
-			AllowedOrigins:   allowedOrigins,
-			AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-			ExposedHeaders:   []string{"Link"},
-			AllowCredentials: true,
-			MaxAge:           300,
-		}
-		r.Use(cors.New(corsOpts).Handler)
+	// Always enable CORS for development (Swagger UI)
+	// If no origins specified, allow localhost
+	if len(allowedOrigins) == 0 {
+		allowedOrigins = []string{"http://localhost:8081", "http://127.0.0.1:8081"}
 	}
+	
+	corsOpts := cors.Options{
+		AllowedOrigins:   allowedOrigins,
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}
+	r.Use(cors.New(corsOpts).Handler)
 	r.Use(middleware.RequestLogger)
 	r.Use(chimw.Recoverer)
 

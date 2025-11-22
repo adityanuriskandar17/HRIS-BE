@@ -1,7 +1,7 @@
 // @title HRIS API
 // @description Human Resource Information System API
 // @version 1.0
-// @host localhost:8080
+// @host localhost:8081
 // @BasePath /api/v1
 package main
 
@@ -10,20 +10,20 @@ import (
 	"log"
 	"net/http"
 
+	_ "github.com/adityanuriskandar17/HRIS-BE/docs"
 	"github.com/go-chi/chi/v5"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	_ "github.com/adityanuriskandar17/HRIS-BE/docs"
 
 	"github.com/adityanuriskandar17/HRIS-BE/internal/auth"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/config"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/db"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/domain/model"
+	domainRepository "github.com/adityanuriskandar17/HRIS-BE/internal/domain/repository"
+	"github.com/adityanuriskandar17/HRIS-BE/internal/domain/services"
 	httpx "github.com/adityanuriskandar17/HRIS-BE/internal/http"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/http/handler"
 	httputil "github.com/adityanuriskandar17/HRIS-BE/internal/http/middleware"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/repository"
-	domainRepository "github.com/adityanuriskandar17/HRIS-BE/internal/domain/repository"
-	"github.com/adityanuriskandar17/HRIS-BE/internal/domain/services"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/telemetry"
 )
 
@@ -42,16 +42,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Enable UUID extension before running migrations
-	if err := gdb.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"").Error; err != nil {
-		log.Fatal(err)
-	}
-	if err := db.SeedReferenceData(gdb, cfg.AdminEmail, cfg.AdminPassword); err != nil {
-
 	if err := db.AutoMigrate(gdb); err != nil {
 		log.Fatal(err)
 	}
-	db.Seed(gdb)
+	if err := db.SeedReferenceData(gdb, cfg.AdminEmail, cfg.AdminPassword); err != nil {
+		log.Fatal(err)
+	}
 
 	shutdownTelemetry, err := telemetry.Setup(context.Background(), cfg.Telemetry.ServiceName, cfg.Telemetry.JaegerEndpoint)
 	if err != nil {
@@ -81,21 +77,21 @@ func main() {
 	companyService := services.NewCompanyService(companyRepo)
 
 	// Initialize handlers
+	tokenSvc := auth.NewService(gdb, cfg.JWTSecret, cfg.Auth.AccessTokenTTL, cfg.Auth.RefreshTokenTTL)
+	authH := handler.NewAuthHandler(userRepo, tenantService, tokenSvc)
+	authMw := &httputil.Authenticator{Secret: cfg.JWTSecret, DB: gdb}
+
 	tenantHandler := handler.NewTenantHandler(tenantService)
 	subscriptionHandler := handler.NewSubscriptionHandler(subscriptionService)
 	invoiceHandler := handler.NewInvoiceHandler(invoiceService)
 	companyHandler := handler.NewCompanyHandler(companyService)
-
-	tokenSvc := auth.NewService(gdb, cfg.JWTSecret, cfg.Auth.AccessTokenTTL, cfg.Auth.RefreshTokenTTL, cfg.Auth.TenantID)
-	authH := &handler.AuthHandler{DB: gdb, Tokens: tokenSvc}
-	masterH := &handler.MasterDataHandler{DB: gdb}
-	authMw := &httputil.Authenticator{Secret: cfg.JWTSecret, DB: gdb}
+	masterH := handler.NewMasterDataHandler(unitRepo, positionRepo, employeeRepo)
 
 	r := httpx.NewRouter(cfg.Auth.AllowedOrigins, func(api chi.Router) {
-	r := httpx.NewRouter(func(api chi.Router) {
-		authH := handler.NewAuthHandler(userRepo, cfg.JWTSecret)
 		api.Post("/auth/login", authH.Login)
+		api.Post("/auth/register", authH.Register)
 		api.Post("/auth/refresh", authH.Refresh)
+		api.Get("/auth/profile/{id}", authH.Profile)
 
 		api.Group(func(protected chi.Router) {
 			protected.Use(authMw.Middleware)
@@ -105,12 +101,6 @@ func main() {
 					sec.Use(httputil.RequireRoles(model.RoleAdmin, model.RoleHR))
 					sec.Get("/units", masterH.ListUnits)
 					sec.Post("/units", masterH.CreateUnit)
-		// TODO: add employee/attendance/leave handlers & middlewares
-
-		masterH := handler.NewMasterDataHandler(unitRepo, positionRepo, employeeRepo)
-		api.Route("/master", func(m chi.Router) {
-			m.Get("/units", masterH.ListUnits)
-			m.Post("/units", masterH.CreateUnit)
 
 					sec.Get("/positions", masterH.ListPositions)
 					sec.Post("/positions", masterH.CreatePosition)
@@ -120,6 +110,9 @@ func main() {
 					sec.Use(httputil.RequireRoles(model.RoleAdmin, model.RoleHR, model.RoleManager))
 					sec.Get("/employees", masterH.ListEmployees)
 					sec.Post("/employees", masterH.CreateEmployee)
+					sec.Get("/employees/{id}", masterH.GetEmployee)
+					sec.Put("/employees/{id}", masterH.UpdateEmployee)
+					sec.Delete("/employees/{id}", masterH.DeleteEmployee)
 				})
 			})
 		})

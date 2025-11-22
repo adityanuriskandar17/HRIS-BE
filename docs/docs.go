@@ -35,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.LoginRequest"
+                            "$ref": "#/definitions/dto.LoginRequest"
                         }
                     }
                 ],
@@ -43,7 +43,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.LoginResponse"
+                            "$ref": "#/definitions/response.TokenResponseEnvelope"
                         }
                     },
                     "400": {
@@ -84,7 +84,59 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.UserResponse"
+                            "$ref": "#/definitions/dto.UserResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/refresh": {
+            "post": {
+                "description": "Refresh access token using refresh token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Refresh access token",
+                "parameters": [
+                    {
+                        "description": "Refresh token",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.refreshReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.TokenResponseEnvelope"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     "401": {
@@ -115,22 +167,22 @@ const docTemplate = `{
                     "auth"
                 ],
                 "summary": "Register a new user",
-                "parameters": [
-                    {
-                        "description": "User registration data",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.RegisterRequest"
-                        }
-                    }
-                ],
+				"parameters": [
+					{
+						"description": "User registration data",
+						"name": "request",
+						"in": "body",
+						"required": true,
+						"schema": {
+							"$ref": "#/definitions/dto.RegisterRequest"
+						}
+					}
+				],
                 "responses": {
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.UserResponse"
+                            "$ref": "#/definitions/dto.UserResponse"
                         }
                     },
                     "400": {
@@ -143,6 +195,330 @@ const docTemplate = `{
                         "description": "Internal Server Error",
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/companies/{id}": {
+            "get": {
+                "description": "Get company profile by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "companies"
+                ],
+                "summary": "Get company profile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Company ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.CompanyDTO"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Update company profile by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "companies"
+                ],
+                "summary": "Update company profile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Company ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update company request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateCompanyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.CompanyDTO"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/companies/{id}/limits": {
+            "get": {
+                "description": "Get company limits based on subscription plan",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "companies"
+                ],
+                "summary": "Get company limits",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Company ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.CompanyLimitsDTO"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/companies/{id}/settings": {
+            "get": {
+                "description": "Get company settings by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "companies"
+                ],
+                "summary": "Get company settings",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Company ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.CompanySettingsDTO"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Update company settings by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "companies"
+                ],
+                "summary": "Update company settings",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Company ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update company settings request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateCompanySettingsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.CompanySettingsDTO"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -187,7 +563,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.InvoiceResponse"
+                                "$ref": "#/definitions/dto.InvoiceResponse"
                             }
                         }
                     },
@@ -221,7 +597,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Invoice"
+                            "$ref": "#/definitions/model.Invoice"
                         }
                     }
                 ],
@@ -229,7 +605,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.InvoiceResponse"
+                            "$ref": "#/definitions/dto.InvoiceResponse"
                         }
                     },
                     "400": {
@@ -281,7 +657,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.InvoiceResponse"
+                                "$ref": "#/definitions/dto.InvoiceResponse"
                             }
                         }
                     },
@@ -332,7 +708,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.InvoiceResponse"
+                            "$ref": "#/definitions/dto.InvoiceResponse"
                         }
                     },
                     "400": {
@@ -390,7 +766,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Invoice"
+                            "$ref": "#/definitions/model.Invoice"
                         }
                     }
                 ],
@@ -398,7 +774,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.InvoiceResponse"
+                            "$ref": "#/definitions/dto.InvoiceResponse"
                         }
                     },
                     "400": {
@@ -458,7 +834,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.PayInvoiceRequest"
+                            "$ref": "#/definitions/dto.PayInvoiceRequest"
                         }
                     }
                 ],
@@ -529,7 +905,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SendInvoiceRequest"
+                            "$ref": "#/definitions/dto.SendInvoiceRequest"
                         }
                     }
                 ],
@@ -592,7 +968,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Employee"
+                                "$ref": "#/definitions/model.Employee"
                             }
                         }
                     },
@@ -623,7 +999,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.EmployeeRequest"
+                            "$ref": "#/definitions/dto.EmployeeRequest"
                         }
                     }
                 ],
@@ -631,7 +1007,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Employee"
+                            "$ref": "#/definitions/model.Employee"
                         }
                     },
                     "400": {
@@ -675,7 +1051,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Employee"
+                            "$ref": "#/definitions/model.Employee"
                         }
                     },
                     "400": {
@@ -718,7 +1094,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.EmployeeRequest"
+                            "$ref": "#/definitions/dto.EmployeeRequest"
                         }
                     }
                 ],
@@ -726,7 +1102,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Employee"
+                            "$ref": "#/definitions/model.Employee"
                         }
                     },
                     "400": {
@@ -805,7 +1181,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Position"
+                                "$ref": "#/definitions/model.Position"
                             }
                         }
                     },
@@ -836,7 +1212,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.PositionRequest"
+                            "$ref": "#/definitions/dto.PositionRequest"
                         }
                     }
                 ],
@@ -844,7 +1220,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Position"
+                            "$ref": "#/definitions/model.Position"
                         }
                     },
                     "400": {
@@ -881,7 +1257,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Unit"
+                                "$ref": "#/definitions/model.Unit"
                             }
                         }
                     },
@@ -912,7 +1288,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.UnitRequest"
+                            "$ref": "#/definitions/dto.UnitRequest"
                         }
                     }
                 ],
@@ -920,7 +1296,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Unit"
+                            "$ref": "#/definitions/model.Unit"
                         }
                     },
                     "400": {
@@ -957,7 +1333,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SubscriptionResponse"
+                                "$ref": "#/definitions/dto.SubscriptionResponse"
                             }
                         }
                     },
@@ -991,7 +1367,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SubscriptionRequest"
+                            "$ref": "#/definitions/dto.SubscriptionRequest"
                         }
                     }
                 ],
@@ -999,7 +1375,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SubscriptionResponse"
+                            "$ref": "#/definitions/dto.SubscriptionResponse"
                         }
                     },
                     "400": {
@@ -1051,7 +1427,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SubscriptionResponse"
+                                "$ref": "#/definitions/dto.SubscriptionResponse"
                             }
                         }
                     },
@@ -1102,7 +1478,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SubscriptionResponse"
+                            "$ref": "#/definitions/dto.SubscriptionResponse"
                         }
                     },
                     "400": {
@@ -1160,7 +1536,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SubscriptionRequest"
+                            "$ref": "#/definitions/dto.SubscriptionRequest"
                         }
                     }
                 ],
@@ -1168,7 +1544,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SubscriptionResponse"
+                            "$ref": "#/definitions/dto.SubscriptionResponse"
                         }
                     },
                     "400": {
@@ -1228,7 +1604,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.CancelSubscriptionRequest"
+                            "$ref": "#/definitions/dto.CancelSubscriptionRequest"
                         }
                     }
                 ],
@@ -1299,7 +1675,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.RenewSubscriptionRequest"
+                            "$ref": "#/definitions/dto.RenewSubscriptionRequest"
                         }
                     }
                 ],
@@ -1307,7 +1683,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SubscriptionResponse"
+                            "$ref": "#/definitions/dto.SubscriptionResponse"
                         }
                     },
                     "400": {
@@ -1359,7 +1735,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.TenantDTO"
+                                "$ref": "#/definitions/dto.TenantDTO"
                             }
                         }
                     },
@@ -1393,7 +1769,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.CreateTenantRequest"
+                            "$ref": "#/definitions/dto.CreateTenantRequest"
                         }
                     }
                 ],
@@ -1401,7 +1777,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.TenantDTO"
+                            "$ref": "#/definitions/dto.TenantDTO"
                         }
                     },
                     "400": {
@@ -1451,7 +1827,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.TenantDTO"
+                            "$ref": "#/definitions/dto.TenantDTO"
                         }
                     },
                     "400": {
@@ -1500,7 +1876,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.UpdateTenantRequest"
+                            "$ref": "#/definitions/dto.UpdateTenantRequest"
                         }
                     }
                 ],
@@ -1508,7 +1884,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.TenantDTO"
+                            "$ref": "#/definitions/dto.TenantDTO"
                         }
                     },
                     "400": {
@@ -1534,188 +1910,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Employee": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "createdById": {
-                    "type": "string"
-                },
-                "dateOfBirth": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "employeeCode": {
-                    "type": "string"
-                },
-                "employmentStatus": {
-                    "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.EmploymentStatus"
-                },
-                "endDate": {
-                    "type": "string"
-                },
-                "fullName": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "phone": {
-                    "type": "string"
-                },
-                "position": {
-                    "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Position"
-                },
-                "positionId": {
-                    "type": "string"
-                },
-                "startDate": {
-                    "type": "string"
-                },
-                "unit": {
-                    "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Unit"
-                },
-                "unitId": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                },
-                "updatedById": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.EmploymentStatus": {
-            "type": "string",
-            "enum": [
-                "FULLTIME",
-                "CONTRACT",
-                "INTERN",
-                "PARTTIME"
-            ],
-            "x-enum-varnames": [
-                "EmploymentFullTime",
-                "EmploymentContract",
-                "EmploymentIntern",
-                "EmploymentPartTime"
-            ]
-        },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Invoice": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "type": "number"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "dueDate": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "invoiceNumber": {
-                    "type": "string"
-                },
-                "paidAt": {
-                    "type": "string"
-                },
-                "paymentId": {
-                    "type": "string"
-                },
-                "sentAt": {
-                    "type": "string"
-                },
-                "status": {
-                    "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.InvoiceStatus"
-                },
-                "subscriptionId": {
-                    "type": "string"
-                },
-                "tenantId": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.InvoiceStatus": {
-            "type": "string",
-            "enum": [
-                "draft",
-                "sent",
-                "paid",
-                "overdue",
-                "canceled"
-            ],
-            "x-enum-varnames": [
-                "InvoiceStatusDraft",
-                "InvoiceStatusSent",
-                "InvoiceStatusPaid",
-                "InvoiceStatusOverdue",
-                "InvoiceStatusCanceled"
-            ]
-        },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Position": {
-            "type": "object",
-            "properties": {
-                "companyId": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "level": {
-                    "type": "integer"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_domain_model.Unit": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "createdById": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                },
-                "updatedById": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.CancelSubscriptionRequest": {
+        "dto.CancelSubscriptionRequest": {
             "type": "object",
             "properties": {
                 "reason": {
@@ -1723,7 +1918,110 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.CreateTenantRequest": {
+        "dto.CompanyDTO": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "123 Main St, Anytown, USA"
+                },
+                "createdAt": {
+                    "type": "string",
+                    "example": "2023-01-01T00:00:00Z"
+                },
+                "currency": {
+                    "type": "string",
+                    "example": "USD"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Acme Corp"
+                },
+                "registrationNo": {
+                    "type": "string",
+                    "example": "123456789"
+                },
+                "tenantId": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174001"
+                },
+                "timezone": {
+                    "type": "string",
+                    "example": "UTC"
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "example": "2023-01-01T00:00:00Z"
+                }
+            }
+        },
+        "dto.CompanyLimitsDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "maxDepartments": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "maxEmployees": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "maxPositions": {
+                    "type": "integer",
+                    "example": 50
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Acme Corp"
+                },
+                "tenantId": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174001"
+                }
+            }
+        },
+        "dto.CompanySettingsDTO": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "123 Main St, Anytown, USA"
+                },
+                "currency": {
+                    "type": "string",
+                    "example": "USD"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Acme Corp"
+                },
+                "registrationNo": {
+                    "type": "string",
+                    "example": "123456789"
+                },
+                "tenantId": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174001"
+                },
+                "timezone": {
+                    "type": "string",
+                    "example": "UTC"
+                }
+            }
+        },
+        "dto.CreateTenantRequest": {
             "type": "object",
             "required": [
                 "companyName",
@@ -1750,7 +2048,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.EmployeeRequest": {
+        "dto.EmployeeRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -1773,7 +2071,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.InvoiceResponse": {
+        "dto.InvoiceResponse": {
             "type": "object",
             "properties": {
                 "amount": {
@@ -1814,29 +2112,21 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.LoginRequest": {
+        "dto.LoginRequest": {
             "type": "object",
             "properties": {
                 "email": {
                     "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.LoginResponse": {
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string"
-                },
-                "user": {
-                    "$ref": "#/definitions/github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.UserResponse"
-                }
-            }
-        },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.PayInvoiceRequest": {
+				},
+				"password": {
+					"type": "string"
+				},
+				"tenantId": {
+					"type": "string"
+				}
+			}
+		},
+        "dto.PayInvoiceRequest": {
             "type": "object",
             "properties": {
                 "paymentId": {
@@ -1850,7 +2140,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.PositionRequest": {
+        "dto.PositionRequest": {
             "type": "object",
             "properties": {
                 "companyId": {
@@ -1867,7 +2157,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.RegisterRequest": {
+        "dto.RegisterRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -1881,10 +2171,45 @@ const docTemplate = `{
                 },
                 "password": {
                     "type": "string"
+                },
+                "tenant": {
+                    "$ref": "#/definitions/dto.TenantRegistration"
+                },
+                "tenantId": {
+                    "type": "string"
+                }
+            },
+            "example": {
+                "email": "admin@acme.io",
+                "firstName": "Alice",
+                "lastName": "Admin",
+                "password": "secret123",
+                "tenant": {
+                    "companyName": "Acme Corporation",
+                    "domain": "acme.io",
+                    "email": "owner@acme.io",
+                    "name": "Acme HQ"
                 }
             }
         },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.RenewSubscriptionRequest": {
+        "dto.TenantRegistration": {
+            "type": "object",
+            "properties": {
+                "companyName": {
+                    "type": "string"
+                },
+                "domain": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.RenewSubscriptionRequest": {
             "type": "object",
             "properties": {
                 "billingCycle": {
@@ -1898,7 +2223,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SendInvoiceRequest": {
+        "dto.SendInvoiceRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -1906,7 +2231,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SubscriptionRequest": {
+        "dto.SubscriptionRequest": {
             "type": "object",
             "properties": {
                 "billingCycle": {
@@ -1933,7 +2258,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.SubscriptionResponse": {
+        "dto.SubscriptionResponse": {
             "type": "object",
             "properties": {
                 "billingCycle": {
@@ -1971,7 +2296,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.TenantDTO": {
+        "dto.TenantDTO": {
             "type": "object",
             "properties": {
                 "active": {
@@ -2008,7 +2333,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.UnitRequest": {
+        "dto.UnitRequest": {
             "type": "object",
             "properties": {
                 "code": {
@@ -2019,7 +2344,57 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.UpdateTenantRequest": {
+        "dto.UpdateCompanyRequest": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "456 Oak Ave, Anytown, USA"
+                },
+                "currency": {
+                    "type": "string",
+                    "example": "EUR"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Acme Inc"
+                },
+                "registrationNo": {
+                    "type": "string",
+                    "example": "987654321"
+                },
+                "timezone": {
+                    "type": "string",
+                    "example": "America/New_York"
+                }
+            }
+        },
+        "dto.UpdateCompanySettingsRequest": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "456 Oak Ave, Anytown, USA"
+                },
+                "currency": {
+                    "type": "string",
+                    "example": "EUR"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Acme Inc"
+                },
+                "registrationNo": {
+                    "type": "string",
+                    "example": "987654321"
+                },
+                "timezone": {
+                    "type": "string",
+                    "example": "America/New_York"
+                }
+            }
+        },
+        "dto.UpdateTenantRequest": {
             "type": "object",
             "properties": {
                 "active": {
@@ -2044,7 +2419,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_adityanuriskandar17_HRIS-BE_internal_http_dto.UserResponse": {
+        "dto.UserResponse": {
             "type": "object",
             "properties": {
                 "email": {
@@ -2063,6 +2438,246 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "handler.refreshReq": {
+            "type": "object",
+            "properties": {
+                "refreshToken": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Employee": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "createdById": {
+                    "type": "string"
+                },
+                "dateOfBirth": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "employeeCode": {
+                    "type": "string"
+                },
+                "employmentStatus": {
+                    "$ref": "#/definitions/model.EmploymentStatus"
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "fullName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "position": {
+                    "$ref": "#/definitions/model.Position"
+                },
+                "positionId": {
+                    "type": "string"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "unit": {
+                    "$ref": "#/definitions/model.Unit"
+                },
+                "unitId": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "updatedById": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.EmploymentStatus": {
+            "type": "string",
+            "enum": [
+                "FULLTIME",
+                "CONTRACT",
+                "INTERN",
+                "PARTTIME"
+            ],
+            "x-enum-varnames": [
+                "EmploymentFullTime",
+                "EmploymentContract",
+                "EmploymentIntern",
+                "EmploymentPartTime"
+            ]
+        },
+        "model.Invoice": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "dueDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "invoiceNumber": {
+                    "type": "string"
+                },
+                "paidAt": {
+                    "type": "string"
+                },
+                "paymentId": {
+                    "type": "string"
+                },
+                "sentAt": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/model.InvoiceStatus"
+                },
+                "subscriptionId": {
+                    "type": "string"
+                },
+                "tenantId": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.InvoiceStatus": {
+            "type": "string",
+            "enum": [
+                "draft",
+                "sent",
+                "paid",
+                "overdue",
+                "canceled"
+            ],
+            "x-enum-varnames": [
+                "InvoiceStatusDraft",
+                "InvoiceStatusSent",
+                "InvoiceStatusPaid",
+                "InvoiceStatusOverdue",
+                "InvoiceStatusCanceled"
+            ]
+        },
+        "model.Position": {
+            "type": "object",
+            "properties": {
+                "companyId": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "level": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Unit": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "createdById": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "updatedById": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.Meta": {
+            "type": "object",
+            "properties": {
+                "trace_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.Response": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "response.TokenResponseEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "accessToken": {
+                            "type": "string"
+                        },
+                        "expiresIn": {
+                            "type": "integer"
+                        },
+                        "refreshExpiresIn": {
+                            "type": "integer"
+                        },
+                        "refreshToken": {
+                            "type": "string"
+                        },
+                        "role": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
         }
     }
 }`
@@ -2070,7 +2685,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "localhost:8081",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "HRIS API",
