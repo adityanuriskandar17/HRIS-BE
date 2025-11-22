@@ -24,13 +24,13 @@ type TokenPair struct {
 	RefreshExpiresAt time.Time
 }
 
-func SignAccessToken(uid uint64, role string, secret string, ttl time.Duration, tenantID string) (string, time.Time, error) {
+func SignAccessToken(uid string, role string, secret string, ttl time.Duration, tenantID string) (string, time.Time, error) {
 	now := time.Now().UTC()
 	claims := AccessTokenClaims{
 		Role:     role,
 		TenantID: tenantID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   fmt.Sprintf("%d", uid),
+			Subject:   uid,
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(ttl)),
 		},

@@ -38,7 +38,7 @@ func (s *Service) IssueTokenPair(user *model.UserAccount) (*TokenPair, error) {
 		return nil, errors.New("user required")
 	}
 
-	accessToken, accessExp, err := SignAccessToken(user.ID, string(user.Role), s.jwtSecret, s.accessTTL, s.tenantID)
+	accessToken, accessExp, err := SignAccessToken(user.ID.String(), string(user.Role), s.jwtSecret, s.accessTTL, s.tenantID)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +99,7 @@ func (s *Service) RotateRefreshToken(plain string) (*TokenPair, *model.UserAccou
 
 		user = stored.User
 
-		accessToken, accessExp, err := SignAccessToken(user.ID, string(user.Role), s.jwtSecret, s.accessTTL, s.tenantID)
+		accessToken, accessExp, err := SignAccessToken(user.ID.String(), string(user.Role), s.jwtSecret, s.accessTTL, s.tenantID)
 		if err != nil {
 			return err
 		}

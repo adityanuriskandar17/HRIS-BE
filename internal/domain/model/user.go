@@ -15,6 +15,7 @@ type UserAccount struct {
 	PasswordHash string         `gorm:"size:255;not null" json:"-"`
 	FirstName    string         `gorm:"size:100;not null" json:"firstName"`
 	LastName     string         `gorm:"size:100;not null" json:"lastName"`
+	Role         UserRole       `gorm:"type:varchar(20);default:'EMPLOYEE'" json:"role"`
 	IsActive     bool           `gorm:"default:true" json:"isActive"`
 	LastLoginAt  *time.Time     `json:"lastLoginAt"`
 	CreatedAt    time.Time      `json:"createdAt"`

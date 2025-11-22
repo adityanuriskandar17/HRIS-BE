@@ -2,8 +2,9 @@ package middleware
 
 import (
 	"net/http"
-	"strconv"
 	"strings"
+
+	"github.com/google/uuid"
 
 	"github.com/adityanuriskandar17/HRIS-BE/internal/auth"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/domain/model"
@@ -37,7 +38,7 @@ func (a *Authenticator) Middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		uid, err := strconv.ParseUint(claims.Subject, 10, 64)
+		uid, err := uuid.Parse(claims.Subject)
 		if err != nil {
 			envelope.Error(w, r, http.StatusUnauthorized, "UNAUTHENTICATED", "invalid token subject", nil)
 			return
@@ -53,7 +54,7 @@ func (a *Authenticator) Middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		if user.Status == 0 {
+		if !user.IsActive {
 			envelope.Error(w, r, http.StatusForbidden, "FORBIDDEN", "account disabled", nil)
 			return
 		}

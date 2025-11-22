@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/adityanuriskandar17/HRIS-BE/internal/domain/model"
+	"github.com/google/uuid"
 )
 
 type contextKey string
@@ -11,7 +12,7 @@ type contextKey string
 const userContextKey contextKey = "auth.user"
 
 type AuthenticatedUser struct {
-	ID       uint64
+	ID       uuid.UUID
 	Role     model.UserRole
 	TenantID string
 }
