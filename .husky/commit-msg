@@ -1,19 +1,19 @@
 #!/bin/sh
 
 commit_message=$(cat "$1")
-allowed_types=("ci" "chore" "docs" "ticket" "feat" "fix" "perf" "refactor" "revert" "style")
+allowed_types="ci chore docs ticket feat fix perf refactor revert style"
 
 echo "$commit_message" | grep -Eq '^([a-z]+)(\(.+\))?:\s.+'
 if [ $? -ne 0 ]; then
     echo "Error: Commit message must follow the conventional commit format: type(scope): description"
-    echo "Allowed types: ${allowed_types[*]}"
+    echo "Allowed types: $allowed_types"
     exit 1
 fi
 
 type=$(echo "$commit_message" | sed -E 's/^([a-z]+)(\(.+\))?:.*/\1/')
 
 found=false
-for t in "${allowed_types[@]}"; do
+for t in $allowed_types; do
     if [ "$t" = "$type" ]; then
         found=true
         break
@@ -22,7 +22,7 @@ done
 
 if [ "$found" = false ]; then
     echo "Error: Commit type '$type' is not allowed."
-    echo "Allowed types: ${allowed_types[*]}"
+    echo "Allowed types: $allowed_types"
     exit 1
 fi
 

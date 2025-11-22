@@ -14,14 +14,64 @@ const docTemplate = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "securityDefinitions": {
-        "BearerAuth": {
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
-        }
-    },
     "paths": {
+        "/auth/employee": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Admin creates an employee account tied to their tenant",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Create employee account",
+                "parameters": [
+                    {
+                        "description": "Employee account data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateEmployeeAccountRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "Authenticate a user with email and password",
@@ -83,15 +133,10 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "tags": [
                     "auth"
                 ],
-                "summary": "Get user profile",
+                "summary": "Get current user profile",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -114,8 +159,8 @@ const docTemplate = `{
                 }
             }
         },
-	"/auth/profile/{id}": {
-		"get": {
+        "/auth/profile/{id}": {
+            "get": {
                 "description": "Retrieve a user's profile by ID",
                 "consumes": [
                     "application/json"
@@ -123,6 +168,10 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get user profile by ID",
                 "parameters": [
                     {
                         "type": "string",
@@ -132,79 +181,13 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Get user profile by ID",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/dto.UserResponse"
-		}
-	},
-	"/auth/employees": {
-		"post": {
-			"description": "Admin creates an employee account tied to their tenant",
-			"consumes": [
-				"application/json"
-			],
-			"produces": [
-				"application/json"
-			],
-			"parameters": [
-				{
-					"description": "Employee account data",
-					"name": "request",
-					"in": "body",
-					"required": true,
-					"schema": {
-						"$ref": "#/definitions/dto.CreateEmployeeAccountRequest"
-					}
-				}
-			],
-			"security": [
-				{
-					"BearerAuth": []
-				}
-			],
-			"tags": [
-				"auth"
-			],
-			"summary": "Create employee account",
-			"responses": {
-				"201": {
-					"description": "Created",
-					"schema": {
-						"$ref": "#/definitions/dto.UserResponse"
-					}
-				},
-				"400": {
-					"description": "Bad Request",
-					"schema": {
-						"type": "string"
-					}
-				},
-				"401": {
-					"description": "Unauthorized",
-					"schema": {
-						"type": "string"
-					}
-				},
-				"500": {
-					"description": "Internal Server Error",
-					"schema": {
-						"type": "string"
-					}
-				}
-			}
-		}
-	},
+                        }
+                    },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
@@ -297,17 +280,17 @@ const docTemplate = `{
                     "auth"
                 ],
                 "summary": "Register a new user",
-				"parameters": [
-					{
-						"description": "User registration data",
-						"name": "request",
-						"in": "body",
-						"required": true,
-						"schema": {
-							"$ref": "#/definitions/dto.RegisterRequest"
-						}
-					}
-				],
+                "parameters": [
+                    {
+                        "description": "User registration data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RegisterRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "201": {
                         "description": "Created",
@@ -2151,6 +2134,23 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.CreateEmployeeAccountRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.CreateTenantRequest": {
             "type": "object",
             "required": [
@@ -2247,15 +2247,12 @@ const docTemplate = `{
             "properties": {
                 "email": {
                     "type": "string"
-				},
-				"password": {
-					"type": "string"
-				},
-				"tenantId": {
-					"type": "string"
-				}
-			}
-		},
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.PayInvoiceRequest": {
             "type": "object",
             "properties": {
@@ -2287,8 +2284,8 @@ const docTemplate = `{
                 }
             }
         },
-	"dto.RegisterRequest": {
-		"type": "object",
+        "dto.RegisterRequest": {
+            "type": "object",
             "properties": {
                 "email": {
                     "type": "string"
@@ -2306,52 +2303,6 @@ const docTemplate = `{
                     "$ref": "#/definitions/dto.TenantRegistration"
                 },
                 "tenantId": {
-                    "type": "string"
-                }
-            },
-            "example": {
-                "email": "admin@acme.io",
-                "firstName": "Alice",
-                "lastName": "Admin",
-                "password": "secret123",
-                "tenant": {
-                    "companyName": "Acme Corporation",
-                    "domain": "acme.io",
-                    "email": "owner@acme.io",
-                    "name": "Acme HQ"
-                }
-            }
-	},
-	"dto.CreateEmployeeAccountRequest": {
-		"type": "object",
-		"properties": {
-			"email": {
-				"type": "string"
-			},
-			"password": {
-				"type": "string"
-			},
-			"firstName": {
-				"type": "string"
-			},
-			"lastName": {
-				"type": "string"
-			}
-		}
-	},
-	"dto.TenantRegistration": {
-            "type": "object",
-            "properties": {
-                "companyName": {
-                    "type": "string"
-                },
-                "domain": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "name": {
                     "type": "string"
                 }
             }
@@ -2477,6 +2428,23 @@ const docTemplate = `{
                 "updatedAt": {
                     "type": "string",
                     "example": "2023-01-01T00:00:00Z"
+                }
+            }
+        },
+        "dto.TenantRegistration": {
+            "type": "object",
+            "properties": {
+                "companyName": {
+                    "type": "string"
+                },
+                "domain": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },

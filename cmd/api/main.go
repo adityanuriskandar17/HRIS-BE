@@ -99,7 +99,7 @@ func main() {
 
 			protected.Group(func(admin chi.Router) {
 				admin.Use(httputil.RequireRoles(model.RoleAdmin))
-				admin.Post("/auth/employees", authH.CreateEmployeeAccount)
+				admin.Post("/auth/employee", authH.CreateEmployeeAccount)
 			})
 
 			protected.Route("/master", func(m chi.Router) {

@@ -207,7 +207,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} string
 // @Failure 401 {object} string
 // @Failure 500 {object} string
-// @Router /auth/employees [post]
+// @Router /auth/employee [post]
 func (h *AuthHandler) CreateEmployeeAccount(w http.ResponseWriter, r *http.Request) {
 	current, ok := authctx.CurrentUser(r.Context())
 	if !ok {

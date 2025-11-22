@@ -80,6 +80,17 @@ definitions:
         example: UTC
         type: string
     type: object
+  dto.CreateEmployeeAccountRequest:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      password:
+        type: string
+    type: object
   dto.CreateTenantRequest:
     properties:
       companyName:
@@ -184,38 +195,6 @@ definitions:
       tenantId:
         type: string
     type: object
-    example:
-      email: admin@acme.io
-      firstName: Alice
-      lastName: Admin
-      password: secret123
-      tenant:
-        companyName: Acme Corporation
-        domain: acme.io
-        email: owner@acme.io
-        name: Acme HQ
-  dto.CreateEmployeeAccountRequest:
-    properties:
-      email:
-        type: string
-      password:
-        type: string
-      firstName:
-        type: string
-      lastName:
-        type: string
-    type: object
-  dto.TenantRegistration:
-    properties:
-      companyName:
-        type: string
-      domain:
-        type: string
-      email:
-        type: string
-      name:
-        type: string
-    type: object
   dto.RenewSubscriptionRequest:
     properties:
       billingCycle:
@@ -298,6 +277,17 @@ definitions:
         type: string
       updatedAt:
         example: "2023-01-01T00:00:00Z"
+        type: string
+    type: object
+  dto.TenantRegistration:
+    properties:
+      companyName:
+        type: string
+      domain:
+        type: string
+      email:
+        type: string
+      name:
         type: string
     type: object
   dto.UnitRequest:
@@ -543,6 +533,42 @@ info:
   title: HRIS API
   version: "1.0"
 paths:
+  /auth/employee:
+    post:
+      consumes:
+      - application/json
+      description: Admin creates an employee account tied to their tenant
+      parameters:
+      - description: Employee account data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateEmployeeAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Create employee account
+      tags:
+      - auth
   /auth/login:
     post:
       consumes:
@@ -584,8 +610,6 @@ paths:
       description: Retrieve the current authenticated user's profile
       produces:
       - application/json
-      security:
-      - BearerAuth: []
       responses:
         "200":
           description: OK
@@ -599,7 +623,7 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: Get user profile
+      summary: Get current user profile
       tags:
       - auth
   /auth/profile/{id}:
@@ -615,8 +639,6 @@ paths:
         type: string
       produces:
       - application/json
-      security:
-      - BearerAuth: []
       responses:
         "200":
           description: OK
@@ -639,42 +661,6 @@ paths:
           schema:
             type: string
       summary: Get user profile by ID
-      tags:
-      - auth
-  /auth/employees:
-    post:
-      consumes:
-      - application/json
-      description: Admin creates an employee account tied to their tenant
-      parameters:
-      - description: Employee account data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dto.CreateEmployeeAccountRequest'
-      produces:
-      - application/json
-      security:
-      - BearerAuth: []
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/dto.UserResponse'
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      summary: Create employee account
       tags:
       - auth
   /auth/refresh:
@@ -1856,9 +1842,4 @@ paths:
       summary: Update a tenant
       tags:
       - tenants
-securityDefinitions:
-  BearerAuth:
-    in: header
-    name: Authorization
-    type: apiKey
 swagger: "2.0"
