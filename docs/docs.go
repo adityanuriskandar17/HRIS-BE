@@ -14,6 +14,13 @@ const docTemplate = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    },
     "paths": {
         "/auth/login": {
             "post": {
@@ -69,12 +76,17 @@ const docTemplate = `{
         },
         "/auth/profile": {
             "get": {
-                "description": "Retrieve the authenticated user's profile",
+                "description": "Retrieve the current authenticated user's profile",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
                 ],
                 "tags": [
                     "auth"
@@ -89,6 +101,124 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+	"/auth/profile/{id}": {
+		"get": {
+                "description": "Retrieve a user's profile by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get user profile by ID",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserResponse"
+		}
+	},
+	"/auth/employees": {
+		"post": {
+			"description": "Admin creates an employee account tied to their tenant",
+			"consumes": [
+				"application/json"
+			],
+			"produces": [
+				"application/json"
+			],
+			"parameters": [
+				{
+					"description": "Employee account data",
+					"name": "request",
+					"in": "body",
+					"required": true,
+					"schema": {
+						"$ref": "#/definitions/dto.CreateEmployeeAccountRequest"
+					}
+				}
+			],
+			"security": [
+				{
+					"BearerAuth": []
+				}
+			],
+			"tags": [
+				"auth"
+			],
+			"summary": "Create employee account",
+			"responses": {
+				"201": {
+					"description": "Created",
+					"schema": {
+						"$ref": "#/definitions/dto.UserResponse"
+					}
+				},
+				"400": {
+					"description": "Bad Request",
+					"schema": {
+						"type": "string"
+					}
+				},
+				"401": {
+					"description": "Unauthorized",
+					"schema": {
+						"type": "string"
+					}
+				},
+				"500": {
+					"description": "Internal Server Error",
+					"schema": {
+						"type": "string"
+					}
+				}
+			}
+		}
+	},
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "type": "string"
                         }
@@ -2157,8 +2287,8 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.RegisterRequest": {
-            "type": "object",
+	"dto.RegisterRequest": {
+		"type": "object",
             "properties": {
                 "email": {
                     "type": "string"
@@ -2191,8 +2321,25 @@ const docTemplate = `{
                     "name": "Acme HQ"
                 }
             }
-        },
-        "dto.TenantRegistration": {
+	},
+	"dto.CreateEmployeeAccountRequest": {
+		"type": "object",
+		"properties": {
+			"email": {
+				"type": "string"
+			},
+			"password": {
+				"type": "string"
+			},
+			"firstName": {
+				"type": "string"
+			},
+			"lastName": {
+				"type": "string"
+			}
+		}
+	},
+	"dto.TenantRegistration": {
             "type": "object",
             "properties": {
                 "companyName": {

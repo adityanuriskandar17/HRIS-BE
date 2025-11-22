@@ -91,10 +91,16 @@ func main() {
 		api.Post("/auth/login", authH.Login)
 		api.Post("/auth/register", authH.Register)
 		api.Post("/auth/refresh", authH.Refresh)
-		api.Get("/auth/profile/{id}", authH.Profile)
 
 		api.Group(func(protected chi.Router) {
 			protected.Use(authMw.Middleware)
+			protected.Get("/auth/profile", authH.ProfileSelf)
+			protected.Get("/auth/profile/{id}", authH.ProfileByID)
+
+			protected.Group(func(admin chi.Router) {
+				admin.Use(httputil.RequireRoles(model.RoleAdmin))
+				admin.Post("/auth/employees", authH.CreateEmployeeAccount)
+			})
 
 			protected.Route("/master", func(m chi.Router) {
 				m.Group(func(sec chi.Router) {

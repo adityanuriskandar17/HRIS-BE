@@ -11,6 +11,7 @@ import (
 	"github.com/adityanuriskandar17/HRIS-BE/internal/auth"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/domain/model"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/domain/services"
+	"github.com/adityanuriskandar17/HRIS-BE/internal/http/authctx"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/http/dto"
 	httpx "github.com/adityanuriskandar17/HRIS-BE/internal/http/httputils"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/repository"
@@ -194,6 +195,78 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(loginRes)
 }
 
+// CreateEmployeeAccount allows an admin to create an employee user within their tenant
+// @Summary Create employee account
+// @Description Admin creates an employee account tied to their tenant
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body dto.CreateEmployeeAccountRequest true "Employee account data"
+// @Success 201 {object} dto.UserResponse
+// @Failure 400 {object} string
+// @Failure 401 {object} string
+// @Failure 500 {object} string
+// @Router /auth/employees [post]
+func (h *AuthHandler) CreateEmployeeAccount(w http.ResponseWriter, r *http.Request) {
+	current, ok := authctx.CurrentUser(r.Context())
+	if !ok {
+		httpx.Error(w, r, http.StatusUnauthorized, "UNAUTHENTICATED", "unauthorized", nil)
+		return
+	}
+
+	var req dto.CreateEmployeeAccountRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		httpx.Error(w, r, http.StatusBadRequest, "INVALID_JSON", "invalid json payload", nil)
+		return
+	}
+
+	if err := validateEmployeeAccountRequest(req); err != nil {
+		httpx.Error(w, r, http.StatusBadRequest, "INVALID_PAYLOAD", err.Error(), nil)
+		return
+	}
+
+	tenantID, err := uuid.Parse(current.TenantID)
+	if err != nil {
+		httpx.Error(w, r, http.StatusInternalServerError, "INVALID_TENANT", "invalid tenant context", nil)
+		return
+	}
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		httpx.Error(w, r, http.StatusInternalServerError, "INTERNAL_SERVER_ERROR", "failed to hash password", nil)
+		return
+	}
+
+	user := model.UserAccount{
+		TenantID:     tenantID,
+		Email:        strings.TrimSpace(req.Email),
+		PasswordHash: string(passwordHash),
+		FirstName:    strings.TrimSpace(req.FirstName),
+		LastName:     strings.TrimSpace(req.LastName),
+		Role:         model.RoleEmployee,
+		IsActive:     true,
+	}
+
+	created, err := h.userRepo.Create(r.Context(), user)
+	if err != nil {
+		httpx.Error(w, r, http.StatusInternalServerError, "INTERNAL_SERVER_ERROR", "failed to create user", nil)
+		return
+	}
+
+	resp := dto.UserResponse{
+		ID:        created.ID.String(),
+		Email:     created.Email,
+		FirstName: created.FirstName,
+		LastName:  created.LastName,
+		IsActive:  created.IsActive,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(resp)
+}
+
 func (h *AuthHandler) resolveTenant(req dto.RegisterRequest) (uuid.UUID, model.UserRole, error) {
 	tenantIDStr := strings.TrimSpace(req.TenantID)
 
@@ -249,9 +322,25 @@ func validateTenantRegistration(tenant *dto.TenantRegistration) error {
 	return nil
 }
 
-// Profile handles user profile retrieval
-// @Summary Get user profile
-// @Description Retrieve the authenticated user's profile
+func validateEmployeeAccountRequest(req dto.CreateEmployeeAccountRequest) error {
+	if strings.TrimSpace(req.Email) == "" {
+		return fmt.Errorf("email is required")
+	}
+	if strings.TrimSpace(req.Password) == "" {
+		return fmt.Errorf("password is required")
+	}
+	if strings.TrimSpace(req.FirstName) == "" {
+		return fmt.Errorf("firstName is required")
+	}
+	if strings.TrimSpace(req.LastName) == "" {
+		return fmt.Errorf("lastName is required")
+	}
+	return nil
+}
+
+// ProfileSelf handles retrieval of the currently authenticated user's profile
+// @Summary Get current user profile
+// @Description Retrieve the current authenticated user's profile
 // @Tags auth
 // @Accept json
 // @Produce json
@@ -259,29 +348,53 @@ func validateTenantRegistration(tenant *dto.TenantRegistration) error {
 // @Failure 401 {object} string
 // @Failure 500 {object} string
 // @Router /auth/profile [get]
-func (h *AuthHandler) Profile(w http.ResponseWriter, r *http.Request) {
+func (h *AuthHandler) ProfileSelf(w http.ResponseWriter, r *http.Request) {
+	current, ok := authctx.CurrentUser(r.Context())
+	if !ok {
+		httpx.Error(w, r, http.StatusUnauthorized, "UNAUTHENTICATED", "unauthorized", nil)
+		return
+	}
+	h.renderUserProfile(w, r, current.ID)
+}
+
+// ProfileByID handles user profile retrieval by ID
+// @Summary Get user profile by ID
+// @Description Retrieve a user's profile by ID
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID"
+// @Success 200 {object} dto.UserResponse
+// @Failure 400 {object} string
+// @Failure 401 {object} string
+// @Failure 404 {object} string
+// @Failure 500 {object} string
+// @Router /auth/profile/{id} [get]
+func (h *AuthHandler) ProfileByID(w http.ResponseWriter, r *http.Request) {
 	userID := chi.URLParam(r, "id")
 
-	// Parse UUID
-	uuid, err := uuid.Parse(userID)
+	uid, err := uuid.Parse(userID)
 	if err != nil {
-		httpx.Error(w, r, http.StatusBadRequest, "INVALID_UUID", "Invalid user ID", nil)
+		httpx.Error(w, r, http.StatusBadRequest, "INVALID_UUID", "invalid user ID", nil)
 		return
 	}
 
-	// Find user by ID
-	user, err := h.userRepo.FindByID(r.Context(), uuid)
+	h.renderUserProfile(w, r, uid)
+}
+
+func (h *AuthHandler) renderUserProfile(w http.ResponseWriter, r *http.Request, id uuid.UUID) {
+	user, err := h.userRepo.FindByID(r.Context(), id)
 	if err != nil {
 		httpx.Error(w, r, http.StatusNotFound, "USER_NOT_FOUND", "User not found", nil)
 		return
 	}
 
-	// Prepare response
 	userRes := dto.UserResponse{
 		ID:        user.ID.String(),
 		Email:     user.Email,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
+		IsActive:  user.IsActive,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
