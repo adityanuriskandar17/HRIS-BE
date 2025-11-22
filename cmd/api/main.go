@@ -14,10 +14,13 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	_ "github.com/adityanuriskandar17/HRIS-BE/docs"
 
+	"github.com/adityanuriskandar17/HRIS-BE/internal/auth"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/config"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/db"
+	"github.com/adityanuriskandar17/HRIS-BE/internal/domain/model"
 	httpx "github.com/adityanuriskandar17/HRIS-BE/internal/http"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/http/handler"
+	httputil "github.com/adityanuriskandar17/HRIS-BE/internal/http/middleware"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/repository"
 	domainRepository "github.com/adityanuriskandar17/HRIS-BE/internal/domain/repository"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/domain/services"
@@ -38,6 +41,12 @@ func main() {
 	if err := gdb.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"").Error; err != nil {
 		log.Fatal(err)
 	}
+
+	// Enable UUID extension before running migrations
+	if err := gdb.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"").Error; err != nil {
+		log.Fatal(err)
+	}
+	if err := db.SeedReferenceData(gdb, cfg.AdminEmail, cfg.AdminPassword); err != nil {
 
 	if err := db.AutoMigrate(gdb); err != nil {
 		log.Fatal(err)
@@ -77,9 +86,25 @@ func main() {
 	invoiceHandler := handler.NewInvoiceHandler(invoiceService)
 	companyHandler := handler.NewCompanyHandler(companyService)
 
+	tokenSvc := auth.NewService(gdb, cfg.JWTSecret, cfg.Auth.AccessTokenTTL, cfg.Auth.RefreshTokenTTL, cfg.Auth.TenantID)
+	authH := &handler.AuthHandler{DB: gdb, Tokens: tokenSvc}
+	masterH := &handler.MasterDataHandler{DB: gdb}
+	authMw := &httputil.Authenticator{Secret: cfg.JWTSecret, DB: gdb}
+
+	r := httpx.NewRouter(cfg.Auth.AllowedOrigins, func(api chi.Router) {
 	r := httpx.NewRouter(func(api chi.Router) {
 		authH := handler.NewAuthHandler(userRepo, cfg.JWTSecret)
 		api.Post("/auth/login", authH.Login)
+		api.Post("/auth/refresh", authH.Refresh)
+
+		api.Group(func(protected chi.Router) {
+			protected.Use(authMw.Middleware)
+
+			protected.Route("/master", func(m chi.Router) {
+				m.Group(func(sec chi.Router) {
+					sec.Use(httputil.RequireRoles(model.RoleAdmin, model.RoleHR))
+					sec.Get("/units", masterH.ListUnits)
+					sec.Post("/units", masterH.CreateUnit)
 		// TODO: add employee/attendance/leave handlers & middlewares
 
 		masterH := handler.NewMasterDataHandler(unitRepo, positionRepo, employeeRepo)
@@ -87,11 +112,16 @@ func main() {
 			m.Get("/units", masterH.ListUnits)
 			m.Post("/units", masterH.CreateUnit)
 
-			m.Get("/positions", masterH.ListPositions)
-			m.Post("/positions", masterH.CreatePosition)
+					sec.Get("/positions", masterH.ListPositions)
+					sec.Post("/positions", masterH.CreatePosition)
+				})
 
-			m.Get("/employees", masterH.ListEmployees)
-			m.Post("/employees", masterH.CreateEmployee)
+				m.Group(func(sec chi.Router) {
+					sec.Use(httputil.RequireRoles(model.RoleAdmin, model.RoleHR, model.RoleManager))
+					sec.Get("/employees", masterH.ListEmployees)
+					sec.Post("/employees", masterH.CreateEmployee)
+				})
+			})
 		})
 
 		// Subscription routes

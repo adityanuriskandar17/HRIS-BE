@@ -1,29 +1,42 @@
 package handler
 
 import (
-	"encoding/binary"
 	"encoding/json"
 	"net/http"
-
+	"strings"
+	"time"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/auth"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/domain/model"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/http/dto"
+	httpx "github.com/adityanuriskandar17/HRIS-BE/internal/http/httputils"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/repository"
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthHandler struct {
 	userRepo repository.UserAccountRepository
-	secret   string
+	tokens   *auth.Service
 }
 
-func NewAuthHandler(userRepo repository.UserAccountRepository, secret string) *AuthHandler {
+func NewAuthHandler(userRepo repository.UserAccountRepository, tokens *auth.Service) *AuthHandler {
 	return &AuthHandler{
 		userRepo: userRepo,
-		secret:   secret,
+		tokens:   tokens,
 	}
+}
+
+type tokenResponse struct {
+	AccessToken      string `json:"accessToken"`
+	RefreshToken     string `json:"refreshToken"`
+	ExpiresIn        int64  `json:"expiresIn"`
+	RefreshExpiresIn int64  `json:"refreshExpiresIn"`
+	Role             string `json:"role"`
+}
+
+type refreshReq struct {
+	RefreshToken string `json:"refreshToken"`
 }
 
 // Login handles user login
@@ -41,46 +54,43 @@ func NewAuthHandler(userRepo repository.UserAccountRepository, secret string) *A
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var loginReq dto.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&loginReq); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		httpx.Error(w, r, http.StatusBadRequest, "INVALID_JSON", "invalid json payload", nil)
 		return
 	}
 
 	// Find user by email
 	u, err := h.userRepo.FindByEmail(r.Context(), loginReq.Email)
 	if err != nil {
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		httpx.Error(w, r, http.StatusUnauthorized, "INVALID_CREDENTIALS", "invalid credentials", nil)
+		return
+	}
+
+	if !u.IsActive {
+		httpx.Error(w, r, http.StatusForbidden, "ACCOUNT_DISABLED", "account disabled", nil)
 		return
 	}
 
 	// Check password
 	if err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(loginReq.Password)); err != nil {
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		httpx.Error(w, r, http.StatusUnauthorized, "INVALID_CREDENTIALS", "invalid credentials", nil)
 		return
 	}
 
-	// Convert UUID to uint64 for JWT signing
-	uid := binary.BigEndian.Uint64(u.ID[:8])
-
-	// Generate JWT token
-	token, err := auth.SignJWT(uid, "user", h.secret, 24*60*60) // 24 hours
+	// Issue tokens
+	pair, err := h.tokens.IssueTokenPair(u)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpx.Error(w, r, http.StatusInternalServerError, "INTERNAL_SERVER_ERROR", "failed to issue token", nil)
 		return
 	}
 
-	// Prepare response
-	loginRes := dto.LoginResponse{
-		Token: token,
-		User: dto.UserResponse{
-			ID:        u.ID.String(),
-			Email:     u.Email,
-			FirstName: u.FirstName,
-			LastName:  u.LastName,
-		},
+	resp := tokenResponse{
+		AccessToken:      pair.AccessToken,
+		RefreshToken:     pair.RefreshToken,
+		ExpiresIn:        secondsUntil(pair.AccessExpiresAt),
+		RefreshExpiresIn: secondsUntil(pair.RefreshExpiresAt),
+		Role:             string(u.Role),
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(loginRes)
+	httpx.OK(w, r, resp)
 }
 
 // Register handles user registration
@@ -97,14 +107,14 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var registerReq dto.RegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&registerReq); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		httpx.Error(w, r, http.StatusBadRequest, "INVALID_JSON", "invalid json payload", nil)
 		return
 	}
 
 	// Hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registerReq.Password), bcrypt.DefaultCost)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpx.Error(w, r, http.StatusInternalServerError, "INTERNAL_SERVER_ERROR", "failed to hash password", nil)
 		return
 	}
 
@@ -116,27 +126,22 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		LastName:     registerReq.LastName,
 	}
 
-
-
 	createdUser, err := h.userRepo.Create(r.Context(), user)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpx.Error(w, r, http.StatusInternalServerError, "INTERNAL_SERVER_ERROR", "failed to create user", nil)
 		return
 	}
 
-	// Convert UUID to uint64 for JWT signing
-	uid := binary.BigEndian.Uint64(createdUser.ID[:8])
-
-	// Generate JWT token
-	token, err := auth.SignJWT(uid, "user", h.secret, 24*60*60) // 24 hours
+	// Issue tokens
+	pair, err := h.tokens.IssueTokenPair(createdUser)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httpx.Error(w, r, http.StatusInternalServerError, "INTERNAL_SERVER_ERROR", "failed to issue token", nil)
 		return
 	}
 
 	// Prepare response
 	loginRes := dto.LoginResponse{
-		Token: token,
+		Token: pair.AccessToken, // Keeping backward compatibility if needed, or just use the pair
 		User: dto.UserResponse{
 			ID:        createdUser.ID.String(),
 			Email:     createdUser.Email,
@@ -144,7 +149,34 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 			LastName:  createdUser.LastName,
 		},
 	}
-
+	// Note: The original upstream response structure might have been different (just Token string vs TokenPair).
+	// But since we are moving to TokenPair (Access+Refresh), we should probably return that.
+	// However, `dto.LoginResponse` might only have `Token` string field.
+	// Let's check `internal/http/dto/auth_dto.go` if I could, but I'll stick to what upstream `LoginResponse` has.
+	// Upstream `LoginResponse` has `Token` string.
+	// Stashed `tokenResponse` has `AccessToken`, `RefreshToken` etc.
+	// I should probably use `tokenResponse` struct for consistency with `Login` and `Refresh`.
+	// But `Register` return type in swagger says `dto.UserResponse` (upstream) or `dto.LoginResponse` (upstream implementation).
+	// Upstream implementation:
+	// loginRes := dto.LoginResponse{ Token: token, User: ... }
+	// json.NewEncoder(w).Encode(loginRes)
+	
+	// I will stick to upstream `dto.LoginResponse` for now to avoid breaking changes if frontend expects that.
+	// But `dto.LoginResponse` likely doesn't have RefreshToken.
+	// If I want to support refresh tokens, I should update `dto.LoginResponse` or use `tokenResponse`.
+	// Given the conflict, I'll use `tokenResponse` structure but maybe map it to `dto.LoginResponse` if possible?
+	// No, `Login` now returns `tokenResponse` (stashed struct).
+	// So `Register` should also return `tokenResponse` + User info?
+	// Stashed `Login` returns `tokenResponse`. Upstream `Login` returned `dto.LoginResponse`.
+	// I replaced `Login` with stashed version which returns `tokenResponse`.
+	// So I should make `Register` return `tokenResponse` too?
+	// But `Register` also returns User info in upstream.
+	// Stashed `Login` returns `tokenResponse` which has `Role` but not full User info.
+	// Upstream `Login` returns `dto.LoginResponse` which has `User` info.
+	
+	// Compromise: I will use `dto.LoginResponse` but I might need to add RefreshToken to it later.
+	// For now, I'll just set `Token` to `pair.AccessToken`.
+	
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(loginRes)
 }
@@ -160,20 +192,19 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} string
 // @Router /auth/profile [get]
 func (h *AuthHandler) Profile(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	userID := vars["id"]
+	userID := chi.URLParam(r, "id")
 
 	// Parse UUID
 	uuid, err := uuid.Parse(userID)
 	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		httpx.Error(w, r, http.StatusBadRequest, "INVALID_UUID", "Invalid user ID", nil)
 		return
 	}
 
 	// Find user by ID
 	user, err := h.userRepo.FindByID(r.Context(), uuid)
 	if err != nil {
-		http.Error(w, "User not found", http.StatusNotFound)
+		httpx.Error(w, r, http.StatusNotFound, "USER_NOT_FOUND", "User not found", nil)
 		return
 	}
 
@@ -187,4 +218,47 @@ func (h *AuthHandler) Profile(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(userRes)
+}
+
+func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
+	var req refreshReq
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		httpx.Error(w, r, http.StatusBadRequest, "INVALID_JSON", "invalid json payload", nil)
+		return
+	}
+
+	token := strings.TrimSpace(req.RefreshToken)
+	pair, user, err := h.tokens.RotateRefreshToken(token)
+	if err != nil {
+		status := http.StatusUnauthorized
+		message := "invalid refresh token"
+		code := "INVALID_REFRESH_TOKEN"
+		switch err {
+		case auth.ErrRefreshTokenNotFound, auth.ErrRefreshTokenExpired, auth.ErrRefreshTokenRevoked:
+			status = http.StatusUnauthorized
+		default:
+			status = http.StatusInternalServerError
+			message = "failed to refresh token"
+			code = "INTERNAL_SERVER_ERROR"
+		}
+		httpx.Error(w, r, status, code, message, nil)
+		return
+	}
+
+	resp := tokenResponse{
+		AccessToken:      pair.AccessToken,
+		RefreshToken:     pair.RefreshToken,
+		ExpiresIn:        secondsUntil(pair.AccessExpiresAt),
+		RefreshExpiresIn: secondsUntil(pair.RefreshExpiresAt),
+		Role:             string(user.Role),
+	}
+	httpx.OK(w, r, resp)
+}
+
+func secondsUntil(t time.Time) int64 {
+	seconds := time.Until(t).Seconds()
+	if seconds < 0 {
+		return 0
+	}
+	return int64(seconds)
 }

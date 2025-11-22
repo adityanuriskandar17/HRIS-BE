@@ -1,15 +1,19 @@
 package http
 
 import (
-	"encoding/json"
 	"net/http"
+
+	"github.com/adityanuriskandar17/HRIS-BE/internal/http/envelope"
 )
 
-func JSON(w http.ResponseWriter, code int, v any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	_ = json.NewEncoder(w).Encode(v)
+func OK(w http.ResponseWriter, r *http.Request, data any) {
+	envelope.Respond(w, r, http.StatusOK, data, nil)
 }
 
-func OK(w http.ResponseWriter, v any)      { JSON(w, http.StatusOK, v) }
-func Created(w http.ResponseWriter, v any) { JSON(w, http.StatusCreated, v) }
+func Created(w http.ResponseWriter, r *http.Request, data any) {
+	envelope.Respond(w, r, http.StatusCreated, data, nil)
+}
+
+func Error(w http.ResponseWriter, r *http.Request, status int, code, message string, fields map[string]string) {
+	envelope.Error(w, r, status, code, message, fields)
+}

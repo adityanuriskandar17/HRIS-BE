@@ -10,6 +10,7 @@ import (
 
 // AutoMigrate applies schema changes required for the MVP features.
 func AutoMigrate(gdb *gorm.DB) error {
+
 	// Check if units table exists with BIGSERIAL ID and drop it if needed
 	if gdb.Migrator().HasTable(&model.Unit{}) {
 		var columnType string
@@ -233,33 +234,37 @@ func AutoMigrate(gdb *gorm.DB) error {
 		}
 	}
 	
-	// Handle employees table type conversion from BIGINT to UUID
-	if gdb.Migrator().HasTable("employees") {
-		// Check if the employees table uses BIGINT for id
-		var isBigIntID bool
-		gdb.Raw("SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'employees' AND column_name = 'id' AND data_type = 'bigint')").Scan(&isBigIntID)
+	// Pre-migration statements (Enums)
+	preStatements := []string{
+		`DO $$ BEGIN
+  CREATE TYPE employment_status_enum AS ENUM ('FULLTIME','PARTTIME','CONTRACT','INTERN');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;`,
+	}
 
-		if isBigIntID {
-			// Drop the existing employees table to avoid conflicts
-			gdb.Exec("DROP TABLE IF EXISTS employees")
-			fmt.Printf("Dropped existing employees table with BIGINT columns\n")
+	for _, stmt := range preStatements {
+		if err := gdb.Exec(stmt).Error; err != nil {
+			return fmt.Errorf("auto migrate pre: executing %q: %w", stmt, err)
 		}
 	}
-	
+
+	// Perform AutoMigrate
 	if err := gdb.AutoMigrate(
 		&model.Unit{},
 		&model.Position{},
 		&model.Employee{},
 		&model.UserAccount{},
+		&model.Tenant{},
+		&model.Subscription{},
+		&model.Plan{},
+		&model.Invoice{},
+		&model.Company{},
+		&model.RefreshToken{},
 	); err != nil {
 		return fmt.Errorf("auto migrate: %w", err)
 	}
 
 	enumStatements := []string{
-		`DO $$ BEGIN
-  CREATE TYPE employment_status_enum AS ENUM ('FULLTIME','PARTTIME','CONTRACT','INTERN');
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;`,
 		`ALTER TABLE public.employees
   ALTER COLUMN employment_status TYPE employment_status_enum USING employment_status::employment_status_enum`,
 	}

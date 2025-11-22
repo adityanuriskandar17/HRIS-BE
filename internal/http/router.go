@@ -2,20 +2,38 @@ package http
 
 import (
 	"net/http"
+
 	"github.com/adityanuriskandar17/HRIS-BE/internal/http/handler"
+	"github.com/adityanuriskandar17/HRIS-BE/internal/http/httputils"
+	"github.com/adityanuriskandar17/HRIS-BE/internal/http/middleware"
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
 type HandlerRegistrar func(r chi.Router)
 
-func NewRouter(register HandlerRegistrar, tenantHandler *handler.TenantHandler, subscriptionHandler *handler.SubscriptionHandler, invoiceHandler *handler.InvoiceHandler, companyHandler *handler.CompanyHandler, port string) http.Handler {
+func NewRouter(allowedOrigins []string, register HandlerRegistrar, tenantHandler *handler.TenantHandler, subscriptionHandler *handler.SubscriptionHandler, invoiceHandler *handler.InvoiceHandler, companyHandler *handler.CompanyHandler, port string) http.Handler {
 	r := chi.NewRouter()
-	r.Use(chimw.RequestID, chimw.RealIP, chimw.Logger, chimw.Recoverer)
+	r.Use(chimw.RequestID, chimw.RealIP)
+
+	if len(allowedOrigins) > 0 {
+		corsOpts := cors.Options{
+			AllowedOrigins:   allowedOrigins,
+			AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+			ExposedHeaders:   []string{"Link"},
+			AllowCredentials: true,
+			MaxAge:           300,
+		}
+		r.Use(cors.New(corsOpts).Handler)
+	}
+	r.Use(middleware.RequestLogger)
+	r.Use(chimw.Recoverer)
 
 	r.Get("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		OK(w, map[string]any{"status": "ok"})
+		httputils.OK(w, r, map[string]any{"status": "ok"})
 	})
 
 	r.Route("/api/v1", func(api chi.Router) { register(api) })

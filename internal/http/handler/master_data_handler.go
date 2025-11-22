@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/adityanuriskandar17/HRIS-BE/internal/domain/model"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/http/dto"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/repository"
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
 
@@ -66,6 +67,15 @@ func (h *MasterDataHandler) CreateUnit(w http.ResponseWriter, r *http.Request) {
 	var unitReq dto.UnitRequest
 	if err := json.NewDecoder(r.Body).Decode(&unitReq); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Validation and Normalization
+	unitReq.Code = strings.ToUpper(strings.TrimSpace(unitReq.Code))
+	unitReq.Name = strings.TrimSpace(unitReq.Name)
+
+	if unitReq.Code == "" || unitReq.Name == "" {
+		http.Error(w, "Code and Name are required", http.StatusBadRequest)
 		return
 	}
 
@@ -137,12 +147,19 @@ func (h *MasterDataHandler) CreatePosition(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	positionReq.Title = strings.TrimSpace(positionReq.Title)
+	if positionReq.Title == "" {
+		http.Error(w, "Title is required", http.StatusBadRequest)
+		return
+	}
+
 	position := model.Position{
 		CompanyID:   companyID,
 		Title:       positionReq.Title,
 		Description: positionReq.Description,
 		Level:       level,
 	}
+
 
 	createdPosition, err := h.positionRepo.Create(r.Context(), position)
 	if err != nil {
@@ -152,6 +169,7 @@ func (h *MasterDataHandler) CreatePosition(w http.ResponseWriter, r *http.Reques
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(createdPosition)
+
 }
 
 // Employee handlers
@@ -222,6 +240,11 @@ func (h *MasterDataHandler) CreateEmployee(w http.ResponseWriter, r *http.Reques
 		employmentStatus = model.EmploymentFullTime // default value
 	}
 
+	if !isValidEmploymentStatus(employmentStatus) {
+		http.Error(w, "Invalid employment status", http.StatusBadRequest)
+		return
+	}
+
 	employee := model.Employee{
 		EmployeeCode:     employeeReq.EmployeeCode,
 		FullName:         employeeReq.FullName,
@@ -241,6 +264,18 @@ func (h *MasterDataHandler) CreateEmployee(w http.ResponseWriter, r *http.Reques
 	json.NewEncoder(w).Encode(createdEmployee)
 }
 
+func isValidEmploymentStatus(status model.EmploymentStatus) bool {
+	switch status {
+	case model.EmploymentFullTime,
+		model.EmploymentContract,
+		model.EmploymentIntern,
+		model.EmploymentPartTime:
+		return true
+	default:
+		return false
+	}
+}
+
 // GetEmployee handles retrieving an employee by ID
 // @Summary Get employee by ID
 // @Description Retrieve a specific employee by their ID
@@ -253,8 +288,7 @@ func (h *MasterDataHandler) CreateEmployee(w http.ResponseWriter, r *http.Reques
 // @Failure 404 {object} string
 // @Router /master/employees/{id} [get]
 func (h *MasterDataHandler) GetEmployee(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	idStr := vars["id"]
+	idStr := chi.URLParam(r, "id")
 
 	id, err := uuid.Parse(idStr)
 	if err != nil {
@@ -285,8 +319,7 @@ func (h *MasterDataHandler) GetEmployee(w http.ResponseWriter, r *http.Request) 
 // @Failure 500 {object} string
 // @Router /master/employees/{id} [put]
 func (h *MasterDataHandler) UpdateEmployee(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	idStr := vars["id"]
+	idStr := chi.URLParam(r, "id")
 
 	id, err := uuid.Parse(idStr)
 	if err != nil {
@@ -345,8 +378,7 @@ func (h *MasterDataHandler) UpdateEmployee(w http.ResponseWriter, r *http.Reques
 // @Failure 404 {object} string
 // @Router /master/employees/{id} [delete]
 func (h *MasterDataHandler) DeleteEmployee(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	idStr := vars["id"]
+	idStr := chi.URLParam(r, "id")
 
 	id, err := uuid.Parse(idStr)
 	if err != nil {

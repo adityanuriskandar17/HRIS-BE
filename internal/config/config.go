@@ -2,7 +2,10 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -13,6 +16,7 @@ type Config struct {
 	JWTSecret     string
 	AdminEmail    string
 	AdminPassword string
+	Auth          AuthConfig
 	Telemetry     TelemetryConfig
 }
 
@@ -21,14 +25,37 @@ type TelemetryConfig struct {
 	JaegerEndpoint string
 }
 
+type AuthConfig struct {
+	AccessTokenTTL  time.Duration
+	RefreshTokenTTL time.Duration
+	TenantID        string
+	AllowedOrigins  []string
+}
+
 func Load() (*Config, error) {
 	_ = godotenv.Load()
+	accessTTL, err := parseBoundedDuration(get("ACCESS_TOKEN_TTL", "15m"), 15*time.Minute, 30*time.Minute)
+	if err != nil {
+		return nil, fmt.Errorf("ACCESS_TOKEN_TTL: %w", err)
+	}
+
+	refreshTTL, err := parseBoundedDuration(get("REFRESH_TOKEN_TTL", "336h"), 7*24*time.Hour, 30*24*time.Hour)
+	if err != nil {
+		return nil, fmt.Errorf("REFRESH_TOKEN_TTL: %w", err)
+	}
+
 	cfg := &Config{
 		Port:          get("PORT", "8080"),
 		DBURL:         get("DATABASE_URL", "postgres://hris:hris@127.0.0.1:5432/hris?sslmode=disable"),
 		JWTSecret:     os.Getenv("JWT_SECRET"),
 		AdminEmail:    get("ADMIN_EMAIL", "admin@example.com"),
 		AdminPassword: get("ADMIN_PASSWORD", "admin12345"),
+		Auth: AuthConfig{
+			AccessTokenTTL:  accessTTL,
+			RefreshTokenTTL: refreshTTL,
+			TenantID:        get("TENANT_ID", ""),
+			AllowedOrigins:  parseCSV(get("CORS_ALLOWED_ORIGINS", "")),
+		},
 		Telemetry: TelemetryConfig{
 			ServiceName:    get("OTEL_SERVICE_NAME", "hris-api"),
 			JaegerEndpoint: get("OTEL_EXPORTER_JAEGER_ENDPOINT", ""),
@@ -45,4 +72,30 @@ func get(k, d string) string {
 		return v
 	}
 	return d
+}
+
+func parseCSV(input string) []string {
+	if input == "" {
+		return nil
+	}
+	parts := strings.Split(input, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		trimmed := strings.TrimSpace(p)
+		if trimmed != "" {
+			out = append(out, trimmed)
+		}
+	}
+	return out
+}
+
+func parseBoundedDuration(raw string, min, max time.Duration) (time.Duration, error) {
+	v, err := time.ParseDuration(raw)
+	if err != nil {
+		return 0, err
+	}
+	if v < min || v > max {
+		return 0, fmt.Errorf("duration %s outside allowed range [%s, %s]", v, min, max)
+	}
+	return v, nil
 }
