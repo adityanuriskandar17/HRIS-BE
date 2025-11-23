@@ -82,7 +82,7 @@ func main() {
 
 	// Initialize handlers
 	tokenSvc := auth.NewService(gdb, cfg.JWTSecret, cfg.Auth.AccessTokenTTL, cfg.Auth.RefreshTokenTTL)
-	authH := handler.NewAuthHandler(userRepo, tenantService, tokenSvc)
+	authH := handler.NewAuthHandler(userRepo, tenantService, companyService, tokenSvc)
 	authMw := &httputil.Authenticator{Secret: cfg.JWTSecret, DB: gdb}
 
 	tenantHandler := handler.NewTenantHandler(tenantService)
@@ -147,6 +147,17 @@ func main() {
 			m.Post("/{id}/send", invoiceHandler.Send)
 			m.Post("/{id}/pay", invoiceHandler.Pay)
 			m.Get("/subscription/{subscriptionId}", invoiceHandler.GetBySubscriptionID)
+		})
+
+		// Company routes
+		api.Route("/companies", func(m chi.Router) {
+			m.Get("/", companyHandler.GetAllCompanies)
+			m.Post("/", companyHandler.CreateCompany)
+			m.Get("/{id}", companyHandler.GetCompanyProfile)
+			m.Patch("/{id}", companyHandler.UpdateCompanyProfile)
+			m.Get("/{id}/settings", companyHandler.GetCompanySettings)
+			m.Patch("/{id}/settings", companyHandler.UpdateCompanySettings)
+			m.Get("/{id}/limits", companyHandler.GetCompanyLimits)
 		})
 	}, tenantHandler, subscriptionHandler, invoiceHandler, companyHandler, cfg.Port)
 

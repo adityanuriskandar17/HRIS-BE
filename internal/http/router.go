@@ -23,7 +23,7 @@ func NewRouter(allowedOrigins []string, register HandlerRegistrar, tenantHandler
 	if len(allowedOrigins) == 0 {
 		allowedOrigins = []string{"http://localhost:8081", "http://127.0.0.1:8081"}
 	}
-	
+
 	corsOpts := cors.Options{
 		AllowedOrigins:   allowedOrigins,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
@@ -41,8 +41,6 @@ func NewRouter(allowedOrigins []string, register HandlerRegistrar, tenantHandler
 	})
 
 	r.Route("/api/v1", func(api chi.Router) { register(api) })
-	
-
 
 	r.Route("/tenants", func(tenant chi.Router) {
 		tenant.Use(chimw.RealIP, chimw.Logger, chimw.Recoverer)
@@ -72,15 +70,6 @@ func NewRouter(allowedOrigins []string, register HandlerRegistrar, tenantHandler
 		invoice.Put("/{id}", invoiceHandler.Update)
 		invoice.Post("/{id}/send", invoiceHandler.Send)
 		invoice.Post("/{id}/pay", invoiceHandler.Pay)
-	})
-
-	r.Route("/companies", func(company chi.Router) {
-		company.Use(chimw.RealIP, chimw.Logger, chimw.Recoverer)
-		company.Get("/{id}", companyHandler.GetCompanyProfile)
-		company.Patch("/{id}", companyHandler.UpdateCompanyProfile)
-		company.Get("/{id}/settings", companyHandler.GetCompanySettings)
-		company.Patch("/{id}/settings", companyHandler.UpdateCompanySettings)
-		company.Get("/{id}/limits", companyHandler.GetCompanyLimits)
 	})
 
 	// Swagger documentation route

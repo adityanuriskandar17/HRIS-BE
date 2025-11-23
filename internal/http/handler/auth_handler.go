@@ -1,3 +1,4 @@
+// Package handler contains HTTP handlers for the API endpoints.
 package handler
 
 import (
@@ -21,18 +22,20 @@ import (
 )
 
 type AuthHandler struct {
-	userRepo  repository.UserAccountRepository
-	tenantSvc services.TenantService
-	tokens    *auth.Service
+	userRepo   repository.UserAccountRepository
+	tenantSvc  services.TenantService
+	companySvc services.CompanyService
+	tokens     *auth.Service
 }
 
 var errTenantCreate = errors.New("tenant creation failed")
 
-func NewAuthHandler(userRepo repository.UserAccountRepository, tenantSvc services.TenantService, tokens *auth.Service) *AuthHandler {
+func NewAuthHandler(userRepo repository.UserAccountRepository, tenantSvc services.TenantService, companySvc services.CompanyService, tokens *auth.Service) *AuthHandler {
 	return &AuthHandler{
-		userRepo:  userRepo,
-		tenantSvc: tenantSvc,
-		tokens:    tokens,
+		userRepo:   userRepo,
+		tenantSvc:  tenantSvc,
+		companySvc: companySvc,
+		tokens:     tokens,
 	}
 }
 
@@ -297,6 +300,22 @@ func (h *AuthHandler) resolveTenant(req dto.RegisterRequest) (uuid.UUID, model.U
 			return uuid.Nil, model.RoleEmployee, fmt.Errorf("%w: %v", errTenantCreate, err)
 		}
 
+		// Create company for the new tenant
+		company := &model.Company{
+			TenantID:       tenant.ID,
+			Name:           strings.TrimSpace(req.Tenant.CompanyName),
+			RegistrationNo: "", // Can be updated later
+			Address:        "", // Can be updated later
+			Timezone:       "UTC",
+			Currency:       "USD",
+		}
+
+		if err := h.companySvc.Create(company); err != nil {
+			// Log error but don't fail registration
+			// Company can be created/updated later via company endpoints
+			_ = err // TODO: Add proper logging
+		}
+
 		return tenant.ID, model.RoleAdmin, nil
 	}
 }
@@ -344,6 +363,7 @@ func validateEmployeeAccountRequest(req dto.CreateEmployeeAccountRequest) error 
 // @Tags auth
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Success 200 {object} dto.UserResponse
 // @Failure 401 {object} string
 // @Failure 500 {object} string
@@ -363,6 +383,7 @@ func (h *AuthHandler) ProfileSelf(w http.ResponseWriter, r *http.Request) {
 // @Tags auth
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "User ID"
 // @Success 200 {object} dto.UserResponse
 // @Failure 400 {object} string

@@ -80,6 +80,27 @@ definitions:
         example: UTC
         type: string
     type: object
+  dto.CreateCompanyRequest:
+    properties:
+      address:
+        example: 123 Main St, Anytown, USA
+        type: string
+      currency:
+        example: USD
+        type: string
+      name:
+        example: Acme Corporation
+        type: string
+      registrationNo:
+        example: "123456789"
+        type: string
+      tenantId:
+        example: 123e4567-e89b-12d3-a456-426614174001
+        type: string
+      timezone:
+        example: UTC
+        type: string
+    type: object
   dto.CreateEmployeeAccountRequest:
     properties:
       email:
@@ -165,6 +186,13 @@ definitions:
       password:
         example: SecurePass123!
         type: string
+    type: object
+  dto.LoginResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/dto.UserResponse'
     type: object
   dto.PayInvoiceRequest:
     properties:
@@ -638,6 +666,8 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: Get current user profile
       tags:
       - auth
@@ -675,6 +705,8 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: Get user profile by ID
       tags:
       - auth
@@ -730,7 +762,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/dto.UserResponse'
+            $ref: '#/definitions/dto.LoginResponse'
         "400":
           description: Bad Request
           schema:
@@ -742,6 +774,70 @@ paths:
       summary: Register a new user
       tags:
       - auth
+  /companies:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all companies
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.CompanyDTO'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all companies
+      tags:
+      - companies
+    post:
+      consumes:
+      - application/json
+      description: Create a new company for a tenant
+      parameters:
+      - description: Company data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCompanyRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CompanyDTO'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Create a new company
+      tags:
+      - companies
   /companies/{id}:
     get:
       consumes:
@@ -777,6 +873,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
       summary: Get company profile
       tags:
       - companies
@@ -820,6 +918,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
       summary: Update company profile
       tags:
       - companies
@@ -858,6 +958,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
       summary: Get company limits
       tags:
       - companies
@@ -896,6 +998,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
       summary: Get company settings
       tags:
       - companies
@@ -939,6 +1043,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
       summary: Update company settings
       tags:
       - companies

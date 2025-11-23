@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/adityanuriskandar17/HRIS-BE/internal/domain/model"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/domain/services"
@@ -19,12 +20,119 @@ func NewCompanyHandler(companyService services.CompanyService) *CompanyHandler {
 	return &CompanyHandler{companyService: companyService}
 }
 
+// GetAllCompanies godoc
+// @Summary Get all companies
+// @Description Get a list of all companies
+// @Tags companies
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} response.Response{data=[]dto.CompanyDTO}
+// @Failure 500 {object} response.Response
+// @Router /companies [get]
+func (h *CompanyHandler) GetAllCompanies(w http.ResponseWriter, r *http.Request) {
+	companies, err := h.companyService.GetAll()
+	if err != nil {
+		res.Error(w, http.StatusInternalServerError, "Failed to retrieve companies")
+		return
+	}
+
+	companyDTOs := make([]*dto.CompanyDTO, len(companies))
+	for i, company := range companies {
+		companyDTOs[i] = &dto.CompanyDTO{
+			ID:             company.ID,
+			TenantID:       company.TenantID,
+			Name:           company.Name,
+			RegistrationNo: company.RegistrationNo,
+			Address:        company.Address,
+			Timezone:       company.Timezone,
+			Currency:       company.Currency,
+			CreatedAt:      company.CreatedAt,
+			UpdatedAt:      company.UpdatedAt,
+		}
+	}
+
+	res.Success(w, http.StatusOK, "Companies retrieved successfully", companyDTOs)
+}
+
+// CreateCompany godoc
+// @Summary Create a new company
+// @Description Create a new company for a tenant
+// @Tags companies
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body dto.CreateCompanyRequest true "Company data"
+// @Success 201 {object} response.Response{data=dto.CompanyDTO}
+// @Failure 400 {object} response.Response
+// @Failure 500 {object} response.Response
+// @Router /companies [post]
+func (h *CompanyHandler) CreateCompany(w http.ResponseWriter, r *http.Request) {
+	var req dto.CreateCompanyRequest
+	if err := res.ReadJSON(r, &req); err != nil {
+		res.Error(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// Validate required fields
+	if strings.TrimSpace(req.Name) == "" {
+		res.Error(w, http.StatusBadRequest, "Name is required")
+		return
+	}
+
+	tenantID, err := uuid.Parse(req.TenantID)
+	if err != nil {
+		res.Error(w, http.StatusBadRequest, "Invalid tenant ID")
+		return
+	}
+
+	// Set defaults
+	timezone := strings.TrimSpace(req.Timezone)
+	if timezone == "" {
+		timezone = "UTC"
+	}
+
+	currency := strings.TrimSpace(req.Currency)
+	if currency == "" {
+		currency = "USD"
+	}
+
+	company := &model.Company{
+		TenantID:       tenantID,
+		Name:           strings.TrimSpace(req.Name),
+		RegistrationNo: strings.TrimSpace(req.RegistrationNo),
+		Address:        strings.TrimSpace(req.Address),
+		Timezone:       timezone,
+		Currency:       currency,
+	}
+
+	if err := h.companyService.Create(company); err != nil {
+		res.Error(w, http.StatusInternalServerError, "Failed to create company")
+		return
+	}
+
+	companyDTO := &dto.CompanyDTO{
+		ID:             company.ID,
+		TenantID:       company.TenantID,
+		Name:           company.Name,
+		RegistrationNo: company.RegistrationNo,
+		Address:        company.Address,
+		Timezone:       company.Timezone,
+		Currency:       company.Currency,
+		CreatedAt:      company.CreatedAt,
+		UpdatedAt:      company.UpdatedAt,
+	}
+
+	res.Success(w, http.StatusCreated, "Company created successfully", companyDTO)
+}
+
 // GetCompanyProfile godoc
 // @Summary Get company profile
 // @Description Get company profile by ID
 // @Tags companies
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Company ID"
 // @Success 200 {object} response.Response{data=dto.CompanyDTO}
 // @Failure 400 {object} response.Response
@@ -66,6 +174,7 @@ func (h *CompanyHandler) GetCompanyProfile(w http.ResponseWriter, r *http.Reques
 // @Tags companies
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Company ID"
 // @Param request body dto.UpdateCompanyRequest true "Update company request"
 // @Success 200 {object} response.Response{data=dto.CompanyDTO}
@@ -146,6 +255,7 @@ func (h *CompanyHandler) UpdateCompanyProfile(w http.ResponseWriter, r *http.Req
 // @Tags companies
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Company ID"
 // @Success 200 {object} response.Response{data=dto.CompanySettingsDTO}
 // @Failure 400 {object} response.Response
@@ -185,6 +295,7 @@ func (h *CompanyHandler) GetCompanySettings(w http.ResponseWriter, r *http.Reque
 // @Tags companies
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Company ID"
 // @Param request body dto.UpdateCompanySettingsRequest true "Update company settings request"
 // @Success 200 {object} response.Response{data=dto.CompanySettingsDTO}
@@ -261,6 +372,7 @@ func (h *CompanyHandler) UpdateCompanySettings(w http.ResponseWriter, r *http.Re
 // @Tags companies
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Company ID"
 // @Success 200 {object} response.Response{data=dto.CompanyLimitsDTO}
 // @Failure 400 {object} response.Response
