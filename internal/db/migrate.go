@@ -21,7 +21,7 @@ func AutoMigrate(gdb *gorm.DB) error {
 			}
 		}
 	}
-	
+
 	// Check if employees table exists with BIGSERIAL ID and drop it if needed
 	if gdb.Migrator().HasTable(&model.Employee{}) {
 		var columnType string
@@ -32,7 +32,7 @@ func AutoMigrate(gdb *gorm.DB) error {
 			}
 		}
 	}
-	
+
 	// Check if user_accounts table exists with BIGINT ID and drop it if needed
 	if gdb.Migrator().HasTable(&model.UserAccount{}) {
 		var columnType string
@@ -43,7 +43,7 @@ func AutoMigrate(gdb *gorm.DB) error {
 			}
 		}
 	}
-	
+
 	// Check if refresh_tokens table exists with BIGINT user_id and drop it if needed
 	if gdb.Migrator().HasTable(&model.RefreshToken{}) {
 		var columnType string
@@ -54,11 +54,7 @@ func AutoMigrate(gdb *gorm.DB) error {
 			}
 		}
 	}
-	
 
-			
-
-	
 	// Handle units table type conversion from BIGINT to UUID
 	if gdb.Migrator().HasTable("units") {
 		// Check if the units table uses BIGINT for id
@@ -70,7 +66,7 @@ func AutoMigrate(gdb *gorm.DB) error {
 			gdb.Exec("DROP TABLE IF EXISTS units")
 			fmt.Printf("Dropped existing units table with BIGINT columns\n")
 		}
-		
+
 		// Check if the units table still exists and print its structure
 		if gdb.Migrator().HasTable("units") {
 			var columnInfo []struct {
@@ -84,7 +80,7 @@ func AutoMigrate(gdb *gorm.DB) error {
 			}
 		}
 	}
-	
+
 	// Handle positions table type conversion from BIGINT to UUID
 	if gdb.Migrator().HasTable("positions") {
 		// Check if the positions table uses BIGINT for id
@@ -95,11 +91,10 @@ func AutoMigrate(gdb *gorm.DB) error {
 			// Drop the existing positions table to avoid conflicts
 			gdb.Exec("DROP TABLE IF EXISTS positions")
 			fmt.Printf("Dropped existing positions table with BIGINT columns\n")
-			
 
 		}
 	}
-	
+
 	// Pre-migration statements (Enums)
 	preStatements := []string{
 		`DO $$ BEGIN

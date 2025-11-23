@@ -26,10 +26,12 @@ func NewInvoiceHandler(invoiceService services.InvoiceService) *InvoiceHandler {
 // @Tags invoices
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param status query string false "Invoice status"
 // @Param page query int false "Page number"
 // @Param limit query int false "Limit per page"
 // @Success 200 {array} dto.InvoiceResponse
+// @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /invoices [get]
 func (h *InvoiceHandler) GetAll(w http.ResponseWriter, r *http.Request) {
@@ -79,9 +81,11 @@ func (h *InvoiceHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 // @Tags invoices
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Invoice ID"
 // @Success 200 {object} dto.InvoiceResponse
 // @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /invoices/{id} [get]
@@ -124,9 +128,11 @@ func (h *InvoiceHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 // @Tags invoices
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param subscriptionId path string true "Subscription ID"
 // @Success 200 {array} dto.InvoiceResponse
 // @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /invoices/subscription/{subscriptionId} [get]
 func (h *InvoiceHandler) GetBySubscriptionID(w http.ResponseWriter, r *http.Request) {
@@ -165,13 +171,16 @@ func (h *InvoiceHandler) GetBySubscriptionID(w http.ResponseWriter, r *http.Requ
 
 // Create godoc
 // @Summary Create a new invoice
-// @Description Create a new invoice
+// @Description Create a new invoice (Admin only)
 // @Tags invoices
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param invoice body model.Invoice true "Invoice data"
 // @Success 201 {object} dto.InvoiceResponse
 // @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /invoices [post]
 func (h *InvoiceHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -208,14 +217,17 @@ func (h *InvoiceHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 // Update godoc
 // @Summary Update an invoice
-// @Description Update an invoice
+// @Description Update an invoice (Admin only)
 // @Tags invoices
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Invoice ID"
 // @Param invoice body model.Invoice true "Invoice data"
 // @Success 200 {object} dto.InvoiceResponse
 // @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /invoices/{id} [put]
@@ -256,14 +268,17 @@ func (h *InvoiceHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 // Send godoc
 // @Summary Send an invoice
-// @Description Send an invoice
+// @Description Send an invoice (Admin only)
 // @Tags invoices
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Invoice ID"
 // @Param send body dto.SendInvoiceRequest true "Send details"
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /invoices/{id}/send [post]
@@ -301,10 +316,12 @@ func (h *InvoiceHandler) Send(w http.ResponseWriter, r *http.Request) {
 // @Tags invoices
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Invoice ID"
 // @Param pay body dto.PayInvoiceRequest true "Payment details"
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /invoices/{id}/pay [post]
@@ -328,8 +345,8 @@ func (h *InvoiceHandler) Pay(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := map[string]string{
-		"message":    "Invoice paid successfully",
-		"paymentId":  req.PaymentID,
+		"message":       "Invoice paid successfully",
+		"paymentId":     req.PaymentID,
 		"paymentMethod": req.PaymentMethod,
 	}
 

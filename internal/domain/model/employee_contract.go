@@ -10,10 +10,10 @@ import (
 type ContractType string
 
 const (
-	ContractTypePermanent ContractType = "permanent"
-	ContractTypeContract  ContractType = "contract"
+	ContractTypePermanent  ContractType = "permanent"
+	ContractTypeContract   ContractType = "contract"
 	ContractTypeInternship ContractType = "internship"
-	ContractTypeProbation ContractType = "probation"
+	ContractTypeProbation  ContractType = "probation"
 )
 
 type EmployeeContract struct {

@@ -293,11 +293,11 @@ func NewInvoiceRepository(db *gorm.DB) InvoiceRepository {
 func (r *InvoiceRepositoryImpl) FindAll(ctx context.Context, status string, page, limit int) ([]model.Invoice, error) {
 	var invoices []model.Invoice
 	query := r.db.WithContext(ctx).Preload("Subscription.Plan").Preload("Subscription.Tenant")
-	
+
 	if status != "" {
 		query = query.Where("status = ?", status)
 	}
-	
+
 	offset := (page - 1) * limit
 	if err := query.Order("created_at DESC").Offset(offset).Limit(limit).Find(&invoices).Error; err != nil {
 		return nil, err

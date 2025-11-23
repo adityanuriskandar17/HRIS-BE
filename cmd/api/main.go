@@ -91,7 +91,7 @@ func main() {
 	companyHandler := handler.NewCompanyHandler(companyService)
 	masterH := handler.NewMasterDataHandler(unitRepo, positionRepo, employeeRepo)
 
-	r := httpx.NewRouter(cfg.Auth.AllowedOrigins, func(api chi.Router) {
+	r := httpx.NewRouter(cfg.CORS, func(api chi.Router) {
 		api.Post("/auth/login", authH.Login)
 		api.Post("/auth/register", authH.Register)
 		api.Post("/auth/refresh", authH.Refresh)
@@ -128,25 +128,51 @@ func main() {
 		})
 
 		// Subscription routes
-		api.Route("/subscriptions", func(m chi.Router) {
-			m.Get("/", subscriptionHandler.GetAll)
-			m.Post("/", subscriptionHandler.Create)
-			m.Get("/{id}", subscriptionHandler.GetByID)
-			m.Put("/{id}", subscriptionHandler.Update)
-			m.Delete("/{id}", subscriptionHandler.Cancel)
-			m.Post("/{id}/renew", subscriptionHandler.Renew)
-			m.Get("/tenant/{tenantId}", subscriptionHandler.GetByTenantID)
+		api.Route("/subscriptions", func(subscription chi.Router) {
+			subscription.Use(authMw.Middleware)
+			subscription.Get("/", subscriptionHandler.GetAll)
+			subscription.Get("/{id}", subscriptionHandler.GetByID)
+			subscription.Get("/tenant/{tenantId}", subscriptionHandler.GetByTenantID)
+
+			// Admin-only routes
+			subscription.Group(func(admin chi.Router) {
+				admin.Use(httputil.RequireRoles(model.RoleAdmin))
+				admin.Post("/", subscriptionHandler.Create)
+				admin.Put("/{id}", subscriptionHandler.Update)
+				admin.Post("/{id}/cancel", subscriptionHandler.Cancel)
+				admin.Post("/{id}/renew", subscriptionHandler.Renew)
+			})
 		})
 
 		// Invoice routes
-		api.Route("/invoices", func(m chi.Router) {
-			m.Get("/", invoiceHandler.GetAll)
-			m.Post("/", invoiceHandler.Create)
-			m.Get("/{id}", invoiceHandler.GetByID)
-			m.Put("/{id}", invoiceHandler.Update)
-			m.Post("/{id}/send", invoiceHandler.Send)
-			m.Post("/{id}/pay", invoiceHandler.Pay)
-			m.Get("/subscription/{subscriptionId}", invoiceHandler.GetBySubscriptionID)
+		api.Route("/invoices", func(invoice chi.Router) {
+			invoice.Use(authMw.Middleware)
+			invoice.Get("/", invoiceHandler.GetAll)
+			invoice.Get("/{id}", invoiceHandler.GetByID)
+			invoice.Get("/subscription/{subscriptionId}", invoiceHandler.GetBySubscriptionID)
+			invoice.Post("/{id}/pay", invoiceHandler.Pay)
+
+			// Admin-only routes
+			invoice.Group(func(admin chi.Router) {
+				admin.Use(httputil.RequireRoles(model.RoleAdmin))
+				admin.Post("/", invoiceHandler.Create)
+				admin.Put("/{id}", invoiceHandler.Update)
+				admin.Post("/{id}/send", invoiceHandler.Send)
+			})
+		})
+
+		// Tenant routes
+		api.Route("/tenants", func(tenant chi.Router) {
+			tenant.Use(authMw.Middleware)
+			tenant.Get("/", tenantHandler.GetAll)
+			tenant.Get("/{id}", tenantHandler.GetByID)
+
+			// Admin-only routes
+			tenant.Group(func(admin chi.Router) {
+				admin.Use(httputil.RequireRoles(model.RoleAdmin))
+				admin.Post("/", tenantHandler.Create)
+				admin.Put("/{id}", tenantHandler.Update)
+			})
 		})
 
 		// Company routes

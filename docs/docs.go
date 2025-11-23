@@ -784,6 +784,11 @@ const docTemplate = `{
         },
         "/invoices": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get all invoices",
                 "consumes": [
                     "application/json"
@@ -825,6 +830,15 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -837,7 +851,12 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create a new invoice",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new invoice (Admin only)",
                 "consumes": [
                     "application/json"
                 ],
@@ -875,6 +894,24 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -889,6 +926,11 @@ const docTemplate = `{
         },
         "/invoices/subscription/{subscriptionId}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get invoices by subscription ID",
                 "consumes": [
                     "application/json"
@@ -928,6 +970,15 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -942,6 +993,11 @@ const docTemplate = `{
         },
         "/invoices/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get invoice by ID",
                 "consumes": [
                     "application/json"
@@ -978,6 +1034,15 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -999,7 +1064,12 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Update an invoice",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update an invoice (Admin only)",
                 "consumes": [
                     "application/json"
                 ],
@@ -1044,6 +1114,24 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -1067,6 +1155,11 @@ const docTemplate = `{
         },
         "/invoices/{id}/pay": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Pay an invoice",
                 "consumes": [
                     "application/json"
@@ -1115,6 +1208,15 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -1138,7 +1240,12 @@ const docTemplate = `{
         },
         "/invoices/{id}/send": {
             "post": {
-                "description": "Send an invoice",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Send an invoice (Admin only)",
                 "consumes": [
                     "application/json"
                 ],
@@ -1186,6 +1293,24 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -1209,6 +1334,11 @@ const docTemplate = `{
         },
         "/master/employees": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve a list of all employees",
                 "consumes": [
                     "application/json"
@@ -1230,6 +1360,24 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -1239,7 +1387,12 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create a new employee in the system",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new employee in the system (Admin, HR, Manager only)",
                 "consumes": [
                     "application/json"
                 ],
@@ -1274,6 +1427,24 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -1285,7 +1456,12 @@ const docTemplate = `{
         },
         "/master/employees/{id}": {
             "get": {
-                "description": "Retrieve a specific employee by their ID",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a specific employee by their ID (Admin, HR, Manager only)",
                 "consumes": [
                     "application/json"
                 ],
@@ -1318,6 +1494,24 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -1327,7 +1521,12 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Update an existing employee's information",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update an existing employee's information (Admin, HR, Manager only)",
                 "consumes": [
                     "application/json"
                 ],
@@ -1369,6 +1568,24 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -1378,7 +1595,12 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Delete an employee from the system",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete an employee from the system (Admin, HR, Manager only)",
                 "consumes": [
                     "application/json"
                 ],
@@ -1411,6 +1633,24 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -1422,6 +1662,11 @@ const docTemplate = `{
         },
         "/master/positions": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve a list of all positions",
                 "consumes": [
                     "application/json"
@@ -1443,6 +1688,24 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -1452,7 +1715,12 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create a new position in the system",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new position in the system (Admin, HR only)",
                 "consumes": [
                     "application/json"
                 ],
@@ -1487,6 +1755,24 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -1498,6 +1784,11 @@ const docTemplate = `{
         },
         "/master/units": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve a list of all units",
                 "consumes": [
                     "application/json"
@@ -1519,6 +1810,24 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -1528,7 +1837,12 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create a new unit in the system",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new unit in the system (Admin, HR only)",
                 "consumes": [
                     "application/json"
                 ],
@@ -1563,6 +1877,24 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -1574,6 +1906,11 @@ const docTemplate = `{
         },
         "/subscriptions": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get all subscriptions",
                 "consumes": [
                     "application/json"
@@ -1595,6 +1932,15 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -1607,7 +1953,12 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create a new subscription",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new subscription (Admin only)",
                 "consumes": [
                     "application/json"
                 ],
@@ -1645,6 +1996,24 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -1659,6 +2028,11 @@ const docTemplate = `{
         },
         "/subscriptions/tenant/{tenantId}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get subscriptions by tenant ID",
                 "consumes": [
                     "application/json"
@@ -1698,6 +2072,15 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -1712,6 +2095,11 @@ const docTemplate = `{
         },
         "/subscriptions/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get subscription by ID",
                 "consumes": [
                     "application/json"
@@ -1748,6 +2136,15 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -1769,7 +2166,12 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Update a subscription",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update a subscription (Admin only)",
                 "consumes": [
                     "application/json"
                 ],
@@ -1814,6 +2216,24 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -1837,7 +2257,12 @@ const docTemplate = `{
         },
         "/subscriptions/{id}/cancel": {
             "post": {
-                "description": "Cancel a subscription",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Cancel a subscription (Admin only)",
                 "consumes": [
                     "application/json"
                 ],
@@ -1885,6 +2310,24 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -1908,7 +2351,12 @@ const docTemplate = `{
         },
         "/subscriptions/{id}/renew": {
             "post": {
-                "description": "Renew a subscription",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Renew a subscription (Admin only)",
                 "consumes": [
                     "application/json"
                 ],
@@ -1953,6 +2401,24 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -1976,6 +2442,11 @@ const docTemplate = `{
         },
         "/tenants": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get all tenants",
                 "consumes": [
                     "application/json"
@@ -1997,6 +2468,15 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -2009,7 +2489,12 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create a new tenant",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new tenant (Admin only)",
                 "consumes": [
                     "application/json"
                 ],
@@ -2047,6 +2532,24 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -2061,6 +2564,11 @@ const docTemplate = `{
         },
         "/tenants/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get tenant by ID",
                 "consumes": [
                     "application/json"
@@ -2097,6 +2605,15 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -2109,7 +2626,12 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Update a tenant",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update a tenant (Admin only)",
                 "consumes": [
                     "application/json"
                 ],
@@ -2147,6 +2669,24 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {

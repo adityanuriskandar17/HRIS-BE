@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 )
 
-
 type tenantService struct {
 	tenantRepository repository.TenantRepository
 }

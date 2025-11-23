@@ -10,18 +10,18 @@ import (
 type InvoiceStatus string
 
 const (
-	InvoiceStatusDraft     InvoiceStatus = "draft"
-	InvoiceStatusSent      InvoiceStatus = "sent"
-	InvoiceStatusPaid      InvoiceStatus = "paid"
-	InvoiceStatusOverdue   InvoiceStatus = "overdue"
-	InvoiceStatusCanceled  InvoiceStatus = "canceled"
+	InvoiceStatusDraft    InvoiceStatus = "draft"
+	InvoiceStatusSent     InvoiceStatus = "sent"
+	InvoiceStatusPaid     InvoiceStatus = "paid"
+	InvoiceStatusOverdue  InvoiceStatus = "overdue"
+	InvoiceStatusCanceled InvoiceStatus = "canceled"
 )
 
 type Invoice struct {
 	ID             uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
 	TenantID       uuid.UUID      `gorm:"type:uuid;not null;index" json:"tenantId"`
 	Tenant         Tenant         `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
-	SubscriptionID uuid.UUID     `gorm:"type:uuid;not null;index" json:"subscriptionId"`
+	SubscriptionID uuid.UUID      `gorm:"type:uuid;not null;index" json:"subscriptionId"`
 	Subscription   Subscription   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;" json:"-"`
 	InvoiceNumber  string         `gorm:"size:50;not null;uniqueIndex" json:"invoiceNumber"`
 	Amount         float64        `gorm:"type:decimal(10,2);not null" json:"amount"`

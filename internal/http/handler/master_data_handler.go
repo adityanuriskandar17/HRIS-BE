@@ -38,7 +38,10 @@ func NewMasterDataHandler(
 // @Tags master-data
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Success 200 {array} model.Unit
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
 // @Failure 500 {object} string
 // @Router /master/units [get]
 func (h *MasterDataHandler) ListUnits(w http.ResponseWriter, r *http.Request) {
@@ -54,13 +57,16 @@ func (h *MasterDataHandler) ListUnits(w http.ResponseWriter, r *http.Request) {
 
 // CreateUnit handles creating a new unit
 // @Summary Create a new unit
-// @Description Create a new unit in the system
+// @Description Create a new unit in the system (Admin, HR only)
 // @Tags master-data
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param request body dto.UnitRequest true "Unit data"
 // @Success 201 {object} model.Unit
 // @Failure 400 {object} string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
 // @Failure 500 {object} string
 // @Router /master/units [post]
 func (h *MasterDataHandler) CreateUnit(w http.ResponseWriter, r *http.Request) {
@@ -101,7 +107,10 @@ func (h *MasterDataHandler) CreateUnit(w http.ResponseWriter, r *http.Request) {
 // @Tags master-data
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Success 200 {array} model.Position
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
 // @Failure 500 {object} string
 // @Router /master/positions [get]
 func (h *MasterDataHandler) ListPositions(w http.ResponseWriter, r *http.Request) {
@@ -117,13 +126,16 @@ func (h *MasterDataHandler) ListPositions(w http.ResponseWriter, r *http.Request
 
 // CreatePosition handles creating a new position
 // @Summary Create a new position
-// @Description Create a new position in the system
+// @Description Create a new position in the system (Admin, HR only)
 // @Tags master-data
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param request body dto.PositionRequest true "Position data"
 // @Success 201 {object} model.Position
 // @Failure 400 {object} string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
 // @Failure 500 {object} string
 // @Router /master/positions [post]
 func (h *MasterDataHandler) CreatePosition(w http.ResponseWriter, r *http.Request) {
@@ -160,7 +172,6 @@ func (h *MasterDataHandler) CreatePosition(w http.ResponseWriter, r *http.Reques
 		Level:       level,
 	}
 
-
 	createdPosition, err := h.positionRepo.Create(r.Context(), position)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -179,7 +190,10 @@ func (h *MasterDataHandler) CreatePosition(w http.ResponseWriter, r *http.Reques
 // @Tags master-data
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Success 200 {array} model.Employee
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
 // @Failure 500 {object} string
 // @Router /master/employees [get]
 func (h *MasterDataHandler) ListEmployees(w http.ResponseWriter, r *http.Request) {
@@ -195,13 +209,16 @@ func (h *MasterDataHandler) ListEmployees(w http.ResponseWriter, r *http.Request
 
 // CreateEmployee handles creating a new employee
 // @Summary Create a new employee
-// @Description Create a new employee in the system
+// @Description Create a new employee in the system (Admin, HR, Manager only)
 // @Tags master-data
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param request body dto.EmployeeRequest true "Employee data"
 // @Success 201 {object} model.Employee
 // @Failure 400 {object} string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
 // @Failure 500 {object} string
 // @Router /master/employees [post]
 func (h *MasterDataHandler) CreateEmployee(w http.ResponseWriter, r *http.Request) {
@@ -278,13 +295,16 @@ func isValidEmploymentStatus(status model.EmploymentStatus) bool {
 
 // GetEmployee handles retrieving an employee by ID
 // @Summary Get employee by ID
-// @Description Retrieve a specific employee by their ID
+// @Description Retrieve a specific employee by their ID (Admin, HR, Manager only)
 // @Tags master-data
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Employee ID"
 // @Success 200 {object} model.Employee
 // @Failure 400 {object} string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
 // @Failure 404 {object} string
 // @Router /master/employees/{id} [get]
 func (h *MasterDataHandler) GetEmployee(w http.ResponseWriter, r *http.Request) {
@@ -308,14 +328,17 @@ func (h *MasterDataHandler) GetEmployee(w http.ResponseWriter, r *http.Request) 
 
 // UpdateEmployee handles updating an employee
 // @Summary Update an employee
-// @Description Update an existing employee's information
+// @Description Update an existing employee's information (Admin, HR, Manager only)
 // @Tags master-data
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Employee ID"
 // @Param request body dto.EmployeeRequest true "Updated employee data"
 // @Success 200 {object} model.Employee
 // @Failure 400 {object} string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
 // @Failure 500 {object} string
 // @Router /master/employees/{id} [put]
 func (h *MasterDataHandler) UpdateEmployee(w http.ResponseWriter, r *http.Request) {
@@ -368,13 +391,16 @@ func (h *MasterDataHandler) UpdateEmployee(w http.ResponseWriter, r *http.Reques
 
 // DeleteEmployee handles deleting an employee
 // @Summary Delete an employee
-// @Description Delete an employee from the system
+// @Description Delete an employee from the system (Admin, HR, Manager only)
 // @Tags master-data
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Employee ID"
 // @Success 204 {object} string
 // @Failure 400 {object} string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
 // @Failure 404 {object} string
 // @Router /master/employees/{id} [delete]
 func (h *MasterDataHandler) DeleteEmployee(w http.ResponseWriter, r *http.Request) {

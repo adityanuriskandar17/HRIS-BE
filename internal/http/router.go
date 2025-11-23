@@ -3,6 +3,7 @@ package http
 import (
 	"net/http"
 
+	"github.com/adityanuriskandar17/HRIS-BE/internal/config"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/http/handler"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/http/httputils"
 	"github.com/adityanuriskandar17/HRIS-BE/internal/http/middleware"
@@ -14,23 +15,18 @@ import (
 
 type HandlerRegistrar func(r chi.Router)
 
-func NewRouter(allowedOrigins []string, register HandlerRegistrar, tenantHandler *handler.TenantHandler, subscriptionHandler *handler.SubscriptionHandler, invoiceHandler *handler.InvoiceHandler, companyHandler *handler.CompanyHandler, port string) http.Handler {
+func NewRouter(corsConfig config.CORSConfig, register HandlerRegistrar, tenantHandler *handler.TenantHandler, subscriptionHandler *handler.SubscriptionHandler, invoiceHandler *handler.InvoiceHandler, companyHandler *handler.CompanyHandler, port string) http.Handler {
 	r := chi.NewRouter()
 	r.Use(chimw.RequestID, chimw.RealIP)
 
-	// Always enable CORS for development (Swagger UI)
-	// If no origins specified, allow localhost
-	if len(allowedOrigins) == 0 {
-		allowedOrigins = []string{"http://localhost:8081", "http://127.0.0.1:8081"}
-	}
-
+	// Configure CORS
 	corsOpts := cors.Options{
-		AllowedOrigins:   allowedOrigins,
-		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: true,
-		MaxAge:           300,
+		AllowedOrigins:   corsConfig.AllowedOrigins,
+		AllowedMethods:   corsConfig.AllowedMethods,
+		AllowedHeaders:   corsConfig.AllowedHeaders,
+		ExposedHeaders:   corsConfig.ExposedHeaders,
+		AllowCredentials: corsConfig.AllowCredentials,
+		MaxAge:           corsConfig.MaxAge,
 	}
 	r.Use(cors.New(corsOpts).Handler)
 	r.Use(middleware.RequestLogger)
@@ -41,14 +37,6 @@ func NewRouter(allowedOrigins []string, register HandlerRegistrar, tenantHandler
 	})
 
 	r.Route("/api/v1", func(api chi.Router) { register(api) })
-
-	r.Route("/tenants", func(tenant chi.Router) {
-		tenant.Use(chimw.RealIP, chimw.Logger, chimw.Recoverer)
-		tenant.Get("/", tenantHandler.GetAll)
-		tenant.Get("/{id}", tenantHandler.GetByID)
-		tenant.Post("/", tenantHandler.Create)
-		tenant.Put("/{id}", tenantHandler.Update)
-	})
 
 	r.Route("/subscriptions", func(subscription chi.Router) {
 		subscription.Use(chimw.RealIP, chimw.Logger, chimw.Recoverer)

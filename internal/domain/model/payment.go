@@ -10,10 +10,10 @@ import (
 type PaymentMethod string
 
 const (
-	PaymentMethodCreditCard PaymentMethod = "credit_card"
+	PaymentMethodCreditCard   PaymentMethod = "credit_card"
 	PaymentMethodBankTransfer PaymentMethod = "bank_transfer"
-	PaymentMethodPayPal PaymentMethod = "paypal"
-	PaymentMethodStripe PaymentMethod = "stripe"
+	PaymentMethodPayPal       PaymentMethod = "paypal"
+	PaymentMethodStripe       PaymentMethod = "stripe"
 )
 
 type PaymentStatus string

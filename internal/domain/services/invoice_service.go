@@ -10,13 +10,13 @@ import (
 )
 
 type invoiceService struct {
-	invoiceRepository     repository.InvoiceRepository
+	invoiceRepository      repository.InvoiceRepository
 	subscriptionRepository repository.SubscriptionRepository
 }
 
 func NewInvoiceService(invoiceRepository repository.InvoiceRepository, subscriptionRepository repository.SubscriptionRepository) InvoiceService {
 	return &invoiceService{
-		invoiceRepository:     invoiceRepository,
+		invoiceRepository:      invoiceRepository,
 		subscriptionRepository: subscriptionRepository,
 	}
 }

@@ -25,7 +25,9 @@ func NewSubscriptionHandler(subscriptionService services.SubscriptionService) *S
 // @Tags subscriptions
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Success 200 {array} dto.SubscriptionResponse
+// @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /subscriptions [get]
 func (h *SubscriptionHandler) GetAll(w http.ResponseWriter, r *http.Request) {
@@ -60,9 +62,11 @@ func (h *SubscriptionHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 // @Tags subscriptions
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Subscription ID"
 // @Success 200 {object} dto.SubscriptionResponse
 // @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /subscriptions/{id} [get]
@@ -101,9 +105,11 @@ func (h *SubscriptionHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 // @Tags subscriptions
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param tenantId path string true "Tenant ID"
 // @Success 200 {array} dto.SubscriptionResponse
 // @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /subscriptions/tenant/{tenantId} [get]
 func (h *SubscriptionHandler) GetByTenantID(w http.ResponseWriter, r *http.Request) {
@@ -141,13 +147,16 @@ func (h *SubscriptionHandler) GetByTenantID(w http.ResponseWriter, r *http.Reque
 
 // Create godoc
 // @Summary Create a new subscription
-// @Description Create a new subscription
+// @Description Create a new subscription (Admin only)
 // @Tags subscriptions
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param subscription body dto.SubscriptionRequest true "Subscription data"
 // @Success 201 {object} dto.SubscriptionResponse
 // @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /subscriptions [post]
 func (h *SubscriptionHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -200,14 +209,17 @@ func (h *SubscriptionHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 // Update godoc
 // @Summary Update a subscription
-// @Description Update a subscription
+// @Description Update a subscription (Admin only)
 // @Tags subscriptions
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Subscription ID"
 // @Param subscription body dto.SubscriptionRequest true "Subscription data"
 // @Success 200 {object} dto.SubscriptionResponse
 // @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /subscriptions/{id} [put]
@@ -267,14 +279,17 @@ func (h *SubscriptionHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 // Cancel godoc
 // @Summary Cancel a subscription
-// @Description Cancel a subscription
+// @Description Cancel a subscription (Admin only)
 // @Tags subscriptions
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Subscription ID"
 // @Param cancel body dto.CancelSubscriptionRequest true "Cancel reason"
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /subscriptions/{id}/cancel [post]
@@ -308,14 +323,17 @@ func (h *SubscriptionHandler) Cancel(w http.ResponseWriter, r *http.Request) {
 
 // Renew godoc
 // @Summary Renew a subscription
-// @Description Renew a subscription
+// @Description Renew a subscription (Admin only)
 // @Tags subscriptions
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path string true "Subscription ID"
 // @Param renew body dto.RenewSubscriptionRequest true "Renewal details"
 // @Success 200 {object} dto.SubscriptionResponse
 // @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /subscriptions/{id}/renew [post]

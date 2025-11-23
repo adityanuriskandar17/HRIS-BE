@@ -31,7 +31,6 @@ func (r *TenantRepositoryImpl) GetAll() ([]*model.Tenant, error) {
 	return tenants, nil
 }
 
-
 func (r *TenantRepositoryImpl) GetByID(id uuid.UUID) (*model.Tenant, error) {
 	var tenant model.Tenant
 	if err := r.db.First(&tenant, id).Error; err != nil {
@@ -44,16 +43,10 @@ func (r *TenantRepositoryImpl) Create(tenant *model.Tenant) error {
 	return r.db.Create(tenant).Error
 }
 
-func (r *TenantRepositoryImpl) Update( id uuid.UUID, tenant *model.Tenant) error {
+func (r *TenantRepositoryImpl) Update(id uuid.UUID, tenant *model.Tenant) error {
 	return r.db.Model(&model.Tenant{}).Where("id = ?", id).Updates(tenant).Error
 }
 
 func (r *TenantRepositoryImpl) Delete(id uuid.UUID) error {
 	return r.db.Delete(&model.Tenant{}, id).Error
 }
-
-
-
-
-
-

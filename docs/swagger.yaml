@@ -1075,19 +1075,27 @@ paths:
             items:
               $ref: '#/definitions/dto.InvoiceResponse'
             type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get all invoices
       tags:
       - invoices
     post:
       consumes:
       - application/json
-      description: Create a new invoice
+      description: Create a new invoice (Admin only)
       parameters:
       - description: Invoice data
         in: body
@@ -1108,12 +1116,26 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Create a new invoice
       tags:
       - invoices
@@ -1141,6 +1163,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "404":
           description: Not Found
           schema:
@@ -1153,13 +1181,15 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get invoice by ID
       tags:
       - invoices
     put:
       consumes:
       - application/json
-      description: Update an invoice
+      description: Update an invoice (Admin only)
       parameters:
       - description: Invoice ID
         in: path
@@ -1185,6 +1215,18 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "404":
           description: Not Found
           schema:
@@ -1197,6 +1239,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Update an invoice
       tags:
       - invoices
@@ -1232,6 +1276,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "404":
           description: Not Found
           schema:
@@ -1244,6 +1294,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Pay an invoice
       tags:
       - invoices
@@ -1251,7 +1303,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Send an invoice
+      description: Send an invoice (Admin only)
       parameters:
       - description: Invoice ID
         in: path
@@ -1279,6 +1331,18 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "404":
           description: Not Found
           schema:
@@ -1291,6 +1355,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Send an invoice
       tags:
       - invoices
@@ -1320,12 +1386,20 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get invoices by subscription ID
       tags:
       - invoices
@@ -1343,17 +1417,31 @@ paths:
             items:
               $ref: '#/definitions/model.Employee'
             type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: List all employees
       tags:
       - master-data
     post:
       consumes:
       - application/json
-      description: Create a new employee in the system
+      description: Create a new employee in the system (Admin, HR, Manager only)
       parameters:
       - description: Employee data
         in: body
@@ -1372,10 +1460,24 @@ paths:
           description: Bad Request
           schema:
             type: string
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: Create a new employee
       tags:
       - master-data
@@ -1383,7 +1485,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Delete an employee from the system
+      description: Delete an employee from the system (Admin, HR, Manager only)
       parameters:
       - description: Employee ID
         in: path
@@ -1401,17 +1503,31 @@ paths:
           description: Bad Request
           schema:
             type: string
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "404":
           description: Not Found
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: Delete an employee
       tags:
       - master-data
     get:
       consumes:
       - application/json
-      description: Retrieve a specific employee by their ID
+      description: Retrieve a specific employee by their ID (Admin, HR, Manager only)
       parameters:
       - description: Employee ID
         in: path
@@ -1429,17 +1545,31 @@ paths:
           description: Bad Request
           schema:
             type: string
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "404":
           description: Not Found
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: Get employee by ID
       tags:
       - master-data
     put:
       consumes:
       - application/json
-      description: Update an existing employee's information
+      description: Update an existing employee's information (Admin, HR, Manager only)
       parameters:
       - description: Employee ID
         in: path
@@ -1463,10 +1593,24 @@ paths:
           description: Bad Request
           schema:
             type: string
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: Update an employee
       tags:
       - master-data
@@ -1484,17 +1628,31 @@ paths:
             items:
               $ref: '#/definitions/model.Position'
             type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: List all positions
       tags:
       - master-data
     post:
       consumes:
       - application/json
-      description: Create a new position in the system
+      description: Create a new position in the system (Admin, HR only)
       parameters:
       - description: Position data
         in: body
@@ -1513,10 +1671,24 @@ paths:
           description: Bad Request
           schema:
             type: string
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: Create a new position
       tags:
       - master-data
@@ -1534,17 +1706,31 @@ paths:
             items:
               $ref: '#/definitions/model.Unit'
             type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: List all units
       tags:
       - master-data
     post:
       consumes:
       - application/json
-      description: Create a new unit in the system
+      description: Create a new unit in the system (Admin, HR only)
       parameters:
       - description: Unit data
         in: body
@@ -1563,10 +1749,24 @@ paths:
           description: Bad Request
           schema:
             type: string
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - BearerAuth: []
       summary: Create a new unit
       tags:
       - master-data
@@ -1584,19 +1784,27 @@ paths:
             items:
               $ref: '#/definitions/dto.SubscriptionResponse'
             type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get all subscriptions
       tags:
       - subscriptions
     post:
       consumes:
       - application/json
-      description: Create a new subscription
+      description: Create a new subscription (Admin only)
       parameters:
       - description: Subscription data
         in: body
@@ -1617,12 +1825,26 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Create a new subscription
       tags:
       - subscriptions
@@ -1650,6 +1872,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "404":
           description: Not Found
           schema:
@@ -1662,13 +1890,15 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get subscription by ID
       tags:
       - subscriptions
     put:
       consumes:
       - application/json
-      description: Update a subscription
+      description: Update a subscription (Admin only)
       parameters:
       - description: Subscription ID
         in: path
@@ -1694,6 +1924,18 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "404":
           description: Not Found
           schema:
@@ -1706,6 +1948,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Update a subscription
       tags:
       - subscriptions
@@ -1713,7 +1957,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Cancel a subscription
+      description: Cancel a subscription (Admin only)
       parameters:
       - description: Subscription ID
         in: path
@@ -1741,6 +1985,18 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "404":
           description: Not Found
           schema:
@@ -1753,6 +2009,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Cancel a subscription
       tags:
       - subscriptions
@@ -1760,7 +2018,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Renew a subscription
+      description: Renew a subscription (Admin only)
       parameters:
       - description: Subscription ID
         in: path
@@ -1786,6 +2044,18 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "404":
           description: Not Found
           schema:
@@ -1798,6 +2068,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Renew a subscription
       tags:
       - subscriptions
@@ -1827,12 +2099,20 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get subscriptions by tenant ID
       tags:
       - subscriptions
@@ -1850,19 +2130,27 @@ paths:
             items:
               $ref: '#/definitions/dto.TenantDTO'
             type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get all tenants
       tags:
       - tenants
     post:
       consumes:
       - application/json
-      description: Create a new tenant
+      description: Create a new tenant (Admin only)
       parameters:
       - description: Tenant data
         in: body
@@ -1883,12 +2171,26 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Create a new tenant
       tags:
       - tenants
@@ -1916,19 +2218,27 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get tenant by ID
       tags:
       - tenants
     put:
       consumes:
       - application/json
-      description: Update a tenant
+      description: Update a tenant (Admin only)
       parameters:
       - description: Tenant ID
         in: path
@@ -1954,12 +2264,26 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Update a tenant
       tags:
       - tenants

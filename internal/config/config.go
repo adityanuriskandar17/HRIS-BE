@@ -17,6 +17,7 @@ type Config struct {
 	AdminEmail    string
 	AdminPassword string
 	Auth          AuthConfig
+	CORS          CORSConfig
 	Telemetry     TelemetryConfig
 }
 
@@ -31,6 +32,15 @@ type AuthConfig struct {
 	AllowedOrigins  []string
 }
 
+type CORSConfig struct {
+	AllowedOrigins   []string
+	AllowedMethods   []string
+	AllowedHeaders   []string
+	ExposedHeaders   []string
+	AllowCredentials bool
+	MaxAge           int
+}
+
 func Load() (*Config, error) {
 	_ = godotenv.Load()
 	accessTTL, err := parseBoundedDuration(get("ACCESS_TOKEN_TTL", "15m"), 15*time.Minute, 30*time.Minute)
@@ -43,6 +53,28 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("REFRESH_TOKEN_TTL: %w", err)
 	}
 
+	// Parse CORS configuration
+	corsAllowedOrigins := parseCSV(get("CORS_ALLOWED_ORIGINS", ""))
+	corsAllowedMethods := parseCSV(get("CORS_ALLOWED_METHODS", "GET,POST,PUT,PATCH,DELETE,OPTIONS"))
+	corsAllowedHeaders := parseCSV(get("CORS_ALLOWED_HEADERS", "Accept,Authorization,Content-Type,X-CSRF-Token"))
+	corsExposedHeaders := parseCSV(get("CORS_EXPOSED_HEADERS", "Link"))
+	corsAllowCredentials := get("CORS_ALLOW_CREDENTIALS", "true") == "true"
+	corsMaxAge := parseInt(get("CORS_MAX_AGE", "300"), 300)
+
+	// Default origins for development if not specified
+	if len(corsAllowedOrigins) == 0 {
+		corsAllowedOrigins = []string{
+			"http://localhost:3000",
+			"http://localhost:3001",
+			"http://localhost:5173", // Vite default
+			"http://localhost:8080",
+			"http://localhost:8081",
+			"http://127.0.0.1:3000",
+			"http://127.0.0.1:3001",
+			"http://127.0.0.1:5173",
+		}
+	}
+
 	cfg := &Config{
 		Port:          get("PORT", "8080"),
 		DBURL:         get("DATABASE_URL", "postgres://hris:hris@127.0.0.1:5432/hris?sslmode=disable"),
@@ -52,7 +84,15 @@ func Load() (*Config, error) {
 		Auth: AuthConfig{
 			AccessTokenTTL:  accessTTL,
 			RefreshTokenTTL: refreshTTL,
-			AllowedOrigins:  parseCSV(get("CORS_ALLOWED_ORIGINS", "")),
+			AllowedOrigins:  corsAllowedOrigins,
+		},
+		CORS: CORSConfig{
+			AllowedOrigins:   corsAllowedOrigins,
+			AllowedMethods:   corsAllowedMethods,
+			AllowedHeaders:   corsAllowedHeaders,
+			ExposedHeaders:   corsExposedHeaders,
+			AllowCredentials: corsAllowCredentials,
+			MaxAge:           corsMaxAge,
 		},
 		Telemetry: TelemetryConfig{
 			ServiceName:    get("OTEL_SERVICE_NAME", "hris-api"),
@@ -96,4 +136,12 @@ func parseBoundedDuration(raw string, min, max time.Duration) (time.Duration, er
 		return 0, fmt.Errorf("duration %s outside allowed range [%s, %s]", v, min, max)
 	}
 	return v, nil
+}
+
+func parseInt(raw string, defaultValue int) int {
+	var result int
+	if _, err := fmt.Sscanf(raw, "%d", &result); err != nil {
+		return defaultValue
+	}
+	return result
 }

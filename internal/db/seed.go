@@ -238,5 +238,3 @@ func seedUserAccounts(db *gorm.DB, adminEmail, adminPassword string) error {
 	}
 	return nil
 }
-
-
